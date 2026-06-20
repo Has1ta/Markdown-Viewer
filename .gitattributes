@@ -1,0 +1,14 @@
+# 默认把文本文件在仓库中规范为 LF，检出时交给 Git 按平台处理。
+* text=auto
+
+# Markdown 和配置文件保持文本规范化，减少跨平台换行差异。
+*.md text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+.gitattributes text eol=lf
