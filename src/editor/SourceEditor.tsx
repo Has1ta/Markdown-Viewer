@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { markdown as markdownLanguage } from "@codemirror/lang-markdown";
 import { bracketMatching, defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
-import { EditorState } from "@codemirror/state";
+import { EditorState, Transaction } from "@codemirror/state";
 import {
   drawSelection,
   dropCursor,
@@ -53,7 +53,9 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
           sourceEditorTheme,
           keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
           EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
+            const isExternalUpdate = update.transactions.some((transaction) => transaction.annotation(Transaction.remote));
+
+            if (update.docChanged && !isExternalUpdate) {
               onChangeRef.current(update.state.doc.toString());
             }
           })
@@ -81,7 +83,8 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
         from: 0,
         to: editorView.state.doc.length,
         insert: markdown
-      }
+      },
+      annotations: Transaction.remote.of(true)
     });
   }, [markdown]);
 

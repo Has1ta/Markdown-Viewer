@@ -19,6 +19,10 @@ export default defineConfig({
             return "codemirror";
           }
 
+          if (id.includes("node_modules/prosemirror") || id.includes("node_modules/markdown-it")) {
+            return "prosemirror";
+          }
+
           return undefined;
         }
       }

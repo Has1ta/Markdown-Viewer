@@ -87,6 +87,24 @@
     border-bottom: 1px solid var(--divider);
   }
 
+  .split-pane .source-editor,
+  .render-edit-editor,
+  .render-edit-editor .ProseMirror {
+    min-height: 360px;
+  }
+
+  .render-edit-editor .ProseMirror {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .render-edit-editor h1 {
+    font-size: 30px;
+  }
+
+  .render-edit-editor h2 {
+    font-size: 24px;
+  }
+
   .bar-button.is-primary {
     margin-left: 0;
   }
