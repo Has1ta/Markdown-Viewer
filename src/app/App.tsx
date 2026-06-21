@@ -18,13 +18,14 @@ export function App() {
 
   const headings = useMemo(() => parseHeadings(markdown), [markdown]);
   const stats = useMemo(() => getMarkdownStats(markdown, headings.length), [headings.length, markdown]);
+  const isDirty = markdown !== initialAppState.markdown;
 
   return (
     <AppShell
       markdown={markdown}
       fileName={initialAppState.fileName}
       filePath={initialAppState.filePath}
-      isDirty={initialAppState.isDirty}
+      isDirty={isDirty}
       lastSavedLabel={initialAppState.lastSavedLabel}
       viewMode={viewMode}
       viewModes={viewModes}

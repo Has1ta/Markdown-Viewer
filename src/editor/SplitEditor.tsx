@@ -18,3 +18,5 @@ export function SplitEditor({ markdown, onChangeMarkdown }: SplitEditorProps) {
     </div>
   );
 }
+
+export default SplitEditor;

@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { Suspense, lazy, useEffect, useRef, useState, type ComponentType } from "react";
 import { ArrowUp, Copy, Download, MessageSquareText, PanelLeft, Save, X } from "lucide-react";
 import type { DocumentStats, HeadingItem, ViewMode } from "../app/app-types";
 import { BottomBar } from "./BottomBar";
 import { DocumentHeader } from "./DocumentHeader";
 import { Sidebar } from "./Sidebar";
 import { RenderEditor } from "../editor/RenderEditor";
-import { SourceEditor } from "../editor/SourceEditor";
-import { SplitEditor } from "../editor/SplitEditor";
+import { EmptyState } from "./EmptyState";
+
+const SourceEditor = lazy(() => import("../editor/SourceEditor").then((module) => ({ default: module.SourceEditor })));
+const SplitEditor = lazy(() => import("../editor/SplitEditor").then((module) => ({ default: module.SplitEditor })));
 
 interface AppShellProps {
   markdown: string;
@@ -179,8 +181,16 @@ export function AppShell({
 
         <section className="editor-surface" aria-label="文档内容">
           {viewMode === "render" && <RenderEditor markdown={markdown} />}
-          {viewMode === "source" && <SourceEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />}
-          {viewMode === "split" && <SplitEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />}
+          {viewMode === "source" && (
+            <Suspense fallback={<EmptyState title="正在准备源码视图" description="编辑器资源加载完成后即可继续精修 Markdown。" />}>
+              <SourceEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />
+            </Suspense>
+          )}
+          {viewMode === "split" && (
+            <Suspense fallback={<EmptyState title="正在准备双栏视图" description="源码编辑器加载完成后会显示源码与渲染对照。" />}>
+              <SplitEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />
+            </Suspense>
+          )}
         </section>
 
         <BottomBar

@@ -15,8 +15,7 @@ body {
   background: var(--bg-page);
 }
 
-button,
-textarea {
+button {
   font: inherit;
 }
 
@@ -396,21 +395,16 @@ button {
 }
 
 .source-editor {
-  display: block;
+  display: flex;
   width: 100%;
   min-height: 620px;
-  padding: var(--space-8);
-  border: 0;
-  resize: vertical;
+  overflow: hidden;
   background: var(--bg-panel);
   color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.65;
 }
 
-.source-editor:focus {
-  outline: none;
+.source-editor .cm-editor {
+  width: 100%;
 }
 
 .split-editor {
