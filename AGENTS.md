@@ -28,6 +28,10 @@
 - `STYLE.md`：Markdown Viewer UI 风格指南。
 - `项目功能与显示效果完整整理.md`：产品功能和显示效果说明。
 - `软件制作方案.md`：软件技术路线、阶段计划、多 AGENTS 分工和验收清单。
+- `package.json`：Electron + Vite + React + TypeScript 工程脚本和依赖。
+- `package-lock.json`：npm 依赖锁定文件。
+- `electron/`：桌面窗口、preload 和系统菜单骨架。
+- `src/`：React 应用源码、Markdown 工具函数、样式和示例数据。
 
 ## 多 AGENTS 协作建议
 
@@ -46,3 +50,5 @@
 - 如果新增依赖管理文件，例如 `package.json`、`requirements.txt` 或其他构建配置，应在 `.gitignore` 中补充对应忽略项。
 - 如果项目从文档阶段进入可运行应用阶段，应建立明确的提交节奏，例如需求整理、UI 原型、核心功能、打包发布分别提交。
 - 进入源码阶段后，应以 `软件制作方案.md` 的阶段划分为主线推进，阶段完成后更新验收状态。
+- 当前源码阶段使用 `npm run dev` 启动 Electron 开发窗口，使用 `npm run build` 验证 TypeScript 与 Vite 生产构建。
+- `dist/`、`dist-electron/`、`node_modules/` 和打包产物不应提交到 Git。

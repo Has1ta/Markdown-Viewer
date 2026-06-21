@@ -15,7 +15,50 @@
 
 Markdown Viewer 是一款面向 Windows 桌面的 Markdown 阅读与编辑工具，强调文档优先、长文档阅读体验、渲染校对、源码精修、目录导航、本地文件保存和拖拽导入。
 
-本目录当前主要作为需求与设计资料仓库使用。后续如果加入源码、原型、截图或构建产物，应继续通过 Git 记录每个阶段的变化。
+本目录已进入源码阶段，当前完成 Electron + Vite + React + TypeScript 应用骨架，并提供一份内置 Markdown 示例用于验证首屏阅读体验。后续如果加入原型、截图或构建产物，应继续通过 Git 记录每个阶段的变化。
+
+## 开发命令
+
+首次拉取或清理依赖后安装：
+
+```powershell
+npm install
+```
+
+启动桌面开发环境：
+
+```powershell
+npm run dev
+```
+
+执行类型检查与生产构建：
+
+```powershell
+npm run build
+```
+
+仅检查 TypeScript 类型：
+
+```powershell
+npm run typecheck
+```
+
+## 当前源码结构
+
+- `electron/`：Electron 主进程、preload 和系统菜单骨架。
+- `src/app/`：应用状态、类型和入口组件。
+- `src/components/`：应用外壳、侧栏、文档头和底部操作栏。
+- `src/editor/`：渲染视图、源码视图和双栏视图的初版组件。
+- `src/markdown/`：标题解析、锚点生成和文档统计工具函数。
+- `src/styles/`：由 `STYLE.md` 落地的设计令牌、应用布局、Markdown 排版和响应式样式。
+- `src/test-data/`：内置示例 Markdown 内容。
+- `output/playwright/`：阶段性浏览器截图和视觉验证记录。
+
+## 当前阶段状态
+
+- 已完成第 1 阶段应用骨架：桌面窗口、React UI、暖白纸面样式、侧栏、文档头、主内容区和底部栏。
+- 已提前完成一部分第 2 阶段基础能力：内置 Markdown 示例可渲染为阅读视图。
+- 已为第 3 阶段铺垫标题解析与稳定锚点，目录链接可以和正文标题 `id` 对应。
 
 ## 本地版本控制建议
 

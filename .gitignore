@@ -18,11 +18,13 @@ desktop.ini
 # Node / Electron 常见产物
 node_modules/
 dist/
+dist-electron/
 release/
 out/
 build/
 .vite/
 .cache/
+.playwright-cli/
 
 # Python 常见产物
 __pycache__/
