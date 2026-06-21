@@ -47,18 +47,20 @@ npm run typecheck
 
 - `electron/`：Electron 主进程、preload 和系统菜单骨架。
 - `src/app/`：应用状态、类型和入口组件。
-- `src/components/`：应用外壳、侧栏、文档头和底部操作栏。
+- `src/components/`：应用外壳、侧栏、文档头、空状态和底部操作栏。
 - `src/editor/`：渲染视图、源码视图和双栏视图的初版组件。
 - `src/markdown/`：标题解析、锚点生成和文档统计工具函数。
 - `src/styles/`：由 `STYLE.md` 落地的设计令牌、应用布局、Markdown 排版和响应式样式。
 - `src/test-data/`：内置示例 Markdown 内容。
+- `public/`：favicon 和示例文档图片资源。
 - `output/playwright/`：阶段性浏览器截图和视觉验证记录。
 
 ## 当前阶段状态
 
 - 已完成第 1 阶段应用骨架：桌面窗口、React UI、暖白纸面样式、侧栏、文档头、主内容区和底部栏。
-- 已提前完成一部分第 2 阶段基础能力：内置 Markdown 示例可渲染为阅读视图。
+- 已完成第 2 阶段静态渲染阅读体验：标题、段落、链接、图片、列表、任务列表、引用、表格、行内代码、代码块、分割线、空状态和加载状态均有基础渲染与样式。
 - 已为第 3 阶段铺垫标题解析与稳定锚点，目录链接可以和正文标题 `id` 对应。
+- 已通过 Playwright 检查桌面和窄屏阅读视图，第二阶段移动端截图位于 `output/playwright/stage-2-mobile-preview.png`。
 
 ## 本地版本控制建议
 

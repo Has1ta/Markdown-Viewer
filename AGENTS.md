@@ -32,6 +32,8 @@
 - `package-lock.json`：npm 依赖锁定文件。
 - `electron/`：桌面窗口、preload 和系统菜单骨架。
 - `src/`：React 应用源码、Markdown 工具函数、样式和示例数据。
+- `public/`：静态资源，例如 favicon 和示例文档图片。
+- `output/playwright/`：阶段性视觉验证截图。
 
 ## 多 AGENTS 协作建议
 
@@ -52,3 +54,4 @@
 - 进入源码阶段后，应以 `软件制作方案.md` 的阶段划分为主线推进，阶段完成后更新验收状态。
 - 当前源码阶段使用 `npm run dev` 启动 Electron 开发窗口，使用 `npm run build` 验证 TypeScript 与 Vite 生产构建。
 - `dist/`、`dist-electron/`、`node_modules/` 和打包产物不应提交到 Git。
+- 做阅读视图相关修改后，应检查宽屏与窄屏下是否存在页面级横向溢出，并优先让表格和代码块在自身容器内滚动。

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-label="Markdown document preview">
+  <rect width="960" height="360" rx="22" fill="#F3F0E9"/>
+  <rect x="62" y="52" width="250" height="256" rx="14" fill="#FCFBF8" stroke="#DDD8CF" stroke-width="2"/>
+  <rect x="348" y="52" width="550" height="256" rx="14" fill="#FCFBF8" stroke="#DDD8CF" stroke-width="2"/>
+  <rect x="90" y="86" width="142" height="16" rx="8" fill="#C96A49"/>
+  <rect x="90" y="124" width="184" height="12" rx="6" fill="#DDD8CF"/>
+  <rect x="90" y="154" width="156" height="12" rx="6" fill="#DDD8CF"/>
+  <rect x="90" y="184" width="194" height="12" rx="6" fill="#DDD8CF"/>
+  <rect x="90" y="226" width="128" height="34" rx="9" fill="#F4E5DD"/>
+  <rect x="382" y="86" width="278" height="20" rx="10" fill="#22211F"/>
+  <rect x="382" y="132" width="462" height="12" rx="6" fill="#DDD8CF"/>
+  <rect x="382" y="160" width="420" height="12" rx="6" fill="#DDD8CF"/>
+  <rect x="382" y="188" width="480" height="12" rx="6" fill="#DDD8CF"/>
+  <rect x="382" y="232" width="212" height="18" rx="9" fill="#C96A49"/>
+  <rect x="382" y="266" width="330" height="12" rx="6" fill="#DDD8CF"/>
+</svg>
