@@ -33,6 +33,18 @@
     font-size: 14px;
   }
 
+  .toc-drawer {
+    display: block;
+  }
+
+  .toc-drawer .toc-panel {
+    min-height: calc(100vh - 80px);
+  }
+
+  .toc-drawer .toc-list {
+    max-height: calc(100vh - 196px);
+  }
+
   .document-header {
     margin-top: var(--space-4);
   }
