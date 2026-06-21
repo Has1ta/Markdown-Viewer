@@ -42,7 +42,13 @@
   }
 
   .toc-drawer .toc-list {
-    max-height: calc(100vh - 196px);
+    max-height: calc(100vh - 320px);
+  }
+
+  .toast {
+    right: var(--space-3);
+    bottom: var(--space-3);
+    max-width: calc(100vw - 24px);
   }
 
   .document-header {

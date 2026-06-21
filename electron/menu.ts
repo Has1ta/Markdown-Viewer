@@ -1,10 +1,31 @@
 import { app, BrowserWindow, MenuItemConstructorOptions } from "electron";
 
-function sendCommand(command: string) {
-  BrowserWindow.getFocusedWindow()?.webContents.send("app:menu-command", command);
+export interface RecentFileMenuItem {
+  filePath: string;
+  fileName: string;
 }
 
-export function buildApplicationMenu(): MenuItemConstructorOptions[] {
+function sendCommand(command: string, payload?: unknown) {
+  BrowserWindow.getFocusedWindow()?.webContents.send("app:menu-command", command, payload);
+}
+
+export function buildApplicationMenu(recentFiles: RecentFileMenuItem[] = []): MenuItemConstructorOptions[] {
+  const recentFileMenu: MenuItemConstructorOptions =
+    recentFiles.length > 0
+      ? {
+          label: "最近文件",
+          submenu: recentFiles.map((file) => ({
+            label: file.fileName,
+            toolTip: file.filePath,
+            click: () => sendCommand("open-recent", file.filePath)
+          }))
+        }
+      : {
+          label: "最近文件",
+          enabled: false,
+          submenu: [{ label: "暂无最近文件", enabled: false }]
+        };
+
   return [
     {
       label: "文件",
@@ -24,6 +45,8 @@ export function buildApplicationMenu(): MenuItemConstructorOptions[] {
           accelerator: "CmdOrCtrl+Shift+S",
           click: () => sendCommand("save-as")
         },
+        { type: "separator" },
+        recentFileMenu,
         { type: "separator" },
         {
           label: "退出",

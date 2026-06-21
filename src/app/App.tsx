@@ -3,7 +3,7 @@ import { BookOpen, Columns2, FileCode2 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { UnsavedChangesDialog, type UnsavedChangesChoice } from "../components/UnsavedChangesDialog";
 import { initialAppState } from "./app-state";
-import type { ViewMode } from "./app-types";
+import type { RecentFile, ViewMode } from "./app-types";
 import { parseHeadings } from "../markdown/parse-headings";
 import { getMarkdownStats } from "../markdown/markdown-stats";
 
@@ -19,6 +19,8 @@ export function App() {
   const [filePath, setFilePath] = useState<string | null>(initialAppState.filePath);
   const [fileName, setFileName] = useState(initialAppState.fileName);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(initialAppState.viewMode);
   const [unsavedDialog, setUnsavedDialog] = useState<{ actionLabel: string } | null>(null);
   const unsavedChoiceResolverRef = useRef<((choice: UnsavedChangesChoice) => void) | null>(null);
@@ -26,6 +28,7 @@ export function App() {
   const markdownRef = useRef(markdown);
   const filePathRef = useRef(filePath);
   const fileNameRef = useRef(fileName);
+  const toastTimerRef = useRef<number | null>(null);
 
   const headings = useMemo(() => parseHeadings(markdown), [markdown]);
   const stats = useMemo(() => getMarkdownStats(markdown, headings.length), [headings.length, markdown]);
@@ -51,7 +54,9 @@ export function App() {
   }, [fileName]);
 
   useEffect(() => {
-    const removeMenuListener = window.markdownViewer?.onMenuCommand((command) => {
+    void window.markdownViewer?.getRecentFiles().then((files) => setRecentFiles(files));
+
+    const removeMenuListener = window.markdownViewer?.onMenuCommand((command, payload) => {
       if (command === "open") {
         void handleOpenFile();
       }
@@ -63,14 +68,28 @@ export function App() {
       if (command === "save-as") {
         void handleSaveFileAs();
       }
+
+      if (command === "open-recent" && typeof payload === "string") {
+        void handleOpenRecentFile(payload);
+      }
     });
+    const removeRecentFilesListener = window.markdownViewer?.onRecentFilesUpdated((files) => setRecentFiles(files));
     const removeCloseListener = window.markdownViewer?.onCloseRequested(() => {
       void handleCloseRequested();
     });
 
     return () => {
       removeMenuListener?.();
+      removeRecentFilesListener?.();
       removeCloseListener?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current);
+      }
     };
   }, []);
 
@@ -85,12 +104,64 @@ export function App() {
       return;
     }
 
-    setMarkdown(result.content);
-    setSavedMarkdown(result.content);
-    setFilePath(result.filePath);
-    setFileName(result.fileName);
-    setLastSavedAt(new Date());
-    setViewMode("render");
+    applyOpenedDocument(result);
+  }
+
+  async function handleOpenRecentFile(recentFilePath: string) {
+    const canContinue = await confirmUnsavedChanges("打开最近文件");
+    if (!canContinue) {
+      return;
+    }
+
+    const result = await window.markdownViewer?.openMarkdownFileByPath(recentFilePath);
+    if (!result || result.canceled || result.content === null || result.fileName === null) {
+      showToast(result?.error ?? "最近文件无法打开，已从本次会话列表移除。");
+      return;
+    }
+
+    applyOpenedDocument(result);
+  }
+
+  async function handleDroppedFiles(files: File[]) {
+    const file = files[0];
+    if (!file) {
+      return;
+    }
+
+    if (!isMarkdownFileName(file.name)) {
+      showToast("只能拖入 .md 或 .markdown 文件。");
+      return;
+    }
+
+    const canContinue = await confirmUnsavedChanges("拖拽打开文件");
+    if (!canContinue) {
+      return;
+    }
+
+    const filePathFromElectron = window.markdownViewer?.getPathForFile(file) ?? "";
+    if (filePathFromElectron) {
+      const result = await window.markdownViewer?.openMarkdownFileByPath(filePathFromElectron);
+      if (!result || result.canceled || result.content === null || result.fileName === null) {
+        showToast(result?.error ?? "拖拽文件读取失败。");
+        return;
+      }
+
+      applyOpenedDocument(result);
+      return;
+    }
+
+    try {
+      const content = await file.text();
+      applyOpenedDocument({
+        canceled: false,
+        filePath: null,
+        fileName: file.name,
+        content
+      });
+      showToast("已打开拖拽文件；当前环境未提供本地路径，保存时会进入另存为。");
+    } catch {
+      showToast("拖拽文件读取失败。");
+    }
   }
 
   async function handleSaveFile() {
@@ -156,7 +227,46 @@ export function App() {
     setFilePath(result.filePath);
     setFileName(result.fileName);
     setLastSavedAt(new Date());
+    rememberRecentFile(result.filePath, result.fileName);
     return true;
+  }
+
+  function applyOpenedDocument(result: MarkdownFileResult) {
+    if (result.content === null || result.fileName === null) {
+      return;
+    }
+
+    setMarkdown(result.content);
+    setSavedMarkdown(result.content);
+    setFilePath(result.filePath);
+    setFileName(result.fileName);
+    setLastSavedAt(new Date());
+    setViewMode("render");
+    rememberRecentFile(result.filePath, result.fileName);
+  }
+
+  function rememberRecentFile(nextFilePath: string | null, nextFileName: string | null) {
+    if (!nextFilePath || !nextFileName) {
+      return;
+    }
+
+    setRecentFiles((currentFiles) => [
+      { filePath: nextFilePath, fileName: nextFileName },
+      ...currentFiles.filter((file) => file.filePath !== nextFilePath)
+    ].slice(0, 8));
+  }
+
+  function showToast(message: string) {
+    setToastMessage(message);
+
+    if (toastTimerRef.current !== null) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+
+    toastTimerRef.current = window.setTimeout(() => {
+      setToastMessage(null);
+      toastTimerRef.current = null;
+    }, 3200);
   }
 
   return (
@@ -170,12 +280,16 @@ export function App() {
         viewMode={viewMode}
         viewModes={viewModes}
         headings={headings}
+        recentFiles={recentFiles}
         stats={stats}
+        toastMessage={toastMessage}
         onChangeMarkdown={setMarkdown}
         onChangeViewMode={setViewMode}
         onOpenFile={() => void handleOpenFile()}
+        onOpenRecentFile={(nextFilePath) => void handleOpenRecentFile(nextFilePath)}
         onSaveFile={() => void handleSaveFile()}
         onSaveFileAs={() => void handleSaveFileAs()}
+        onDropFiles={(files) => void handleDroppedFiles(files)}
       />
       {unsavedDialog && (
         <UnsavedChangesDialog actionLabel={unsavedDialog.actionLabel} fileName={fileName} onChoose={resolveUnsavedChoice} />
@@ -189,4 +303,8 @@ function formatSavedTime(date: Date) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+function isMarkdownFileName(fileName: string) {
+  return /\.(md|markdown|mdown|mkd)$/i.test(fileName);
 }

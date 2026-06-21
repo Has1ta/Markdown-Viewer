@@ -13,3 +13,8 @@ export interface DocumentStats {
   headings: number;
   readingMinutes: number;
 }
+
+export interface RecentFile {
+  filePath: string;
+  fileName: string;
+}

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import type { HeadingItem } from "../app/app-types";
+import { ChevronDown, ChevronRight, Clock3 } from "lucide-react";
+import type { HeadingItem, RecentFile } from "../app/app-types";
 
 interface SidebarProps {
   headings: HeadingItem[];
   activeHeadingId: string;
+  recentFiles: RecentFile[];
   onSelectHeading: (headingId: string) => void;
+  onOpenRecentFile: (filePath: string) => void;
 }
 
 interface TocItem extends HeadingItem {
@@ -14,7 +16,7 @@ interface TocItem extends HeadingItem {
   isHidden: boolean;
 }
 
-export function Sidebar({ headings, activeHeadingId, onSelectHeading }: SidebarProps) {
+export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeading, onOpenRecentFile }: SidebarProps) {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLOListElement | null>(null);
   const tocItems = useMemo(() => buildTocItems(headings, collapsedIds), [collapsedIds, headings]);
@@ -94,6 +96,27 @@ export function Sidebar({ headings, activeHeadingId, onSelectHeading }: SidebarP
           </li>
         ))}
       </ol>
+
+      <section className="recent-panel" aria-label="最近文件">
+        <div className="recent-header">
+          <Clock3 size={15} />
+          <span>最近文件</span>
+        </div>
+        {recentFiles.length > 0 ? (
+          <ol className="recent-list">
+            {recentFiles.map((file) => (
+              <li key={file.filePath}>
+                <button className="recent-item" type="button" title={file.filePath} onClick={() => onOpenRecentFile(file.filePath)}>
+                  <span>{file.fileName}</span>
+                  <small>{file.filePath}</small>
+                </button>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="recent-empty">本次会话暂无最近文件</p>
+        )}
+      </section>
     </nav>
   );
 }

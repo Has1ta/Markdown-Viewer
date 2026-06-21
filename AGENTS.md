@@ -59,3 +59,4 @@
 - 做源码编辑器相关修改时，应保持 `markdown` 字符串作为单一真相源；CodeMirror 只负责编辑表面，外部内容变化必须同步进编辑器但不能造成重复回写循环。
 - CodeMirror 依赖应保持懒加载和独立 chunk，避免默认渲染视图首包明显变大。
 - 做本地文件工作流相关修改时，所有文件读写必须通过 preload 暴露的白名单 API；打开文件、拖拽替换、窗口关闭等危险操作必须复用同一个未保存确认流程。
+- 最近文件只保持 session-only，不做持久化；拖拽文件路径应优先通过 preload 暴露的 `webUtils.getPathForFile(file)` 获取，并保持 `navigateOnDragDrop: false` 防止误导航。

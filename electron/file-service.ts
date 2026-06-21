@@ -7,6 +7,7 @@ export interface MarkdownFileResult {
   filePath: string | null;
   fileName: string | null;
   content: string | null;
+  error?: string;
 }
 
 export interface MarkdownSaveResult {
@@ -34,14 +35,38 @@ export async function openMarkdownFile(owner: BrowserWindow): Promise<MarkdownFi
   }
 
   const filePath = result.filePaths[0];
-  const content = await readFile(filePath, "utf8");
+  return readMarkdownFileByPath(filePath);
+}
 
-  return {
-    canceled: false,
-    filePath,
-    fileName: path.basename(filePath),
-    content
-  };
+export async function readMarkdownFileByPath(filePath: string): Promise<MarkdownFileResult> {
+  if (!isMarkdownFilePath(filePath)) {
+    return {
+      canceled: true,
+      filePath: null,
+      fileName: null,
+      content: null,
+      error: "请选择 .md 或 .markdown 文件。"
+    };
+  }
+
+  try {
+    const content = await readFile(filePath, "utf8");
+
+    return {
+      canceled: false,
+      filePath,
+      fileName: path.basename(filePath),
+      content
+    };
+  } catch (error) {
+    return {
+      canceled: true,
+      filePath,
+      fileName: path.basename(filePath),
+      content: null,
+      error: error instanceof Error ? error.message : "读取文件失败。"
+    };
+  }
 }
 
 export async function saveMarkdownFile(
@@ -97,4 +122,8 @@ function ensureMarkdownFileName(fileName: string) {
 
 function ensureMarkdownExtension(filePath: string) {
   return /\.(md|markdown|mdown|mkd)$/i.test(filePath) ? filePath : `${filePath}.md`;
+}
+
+export function isMarkdownFilePath(filePath: string) {
+  return /\.(md|markdown|mdown|mkd)$/i.test(filePath);
 }
