@@ -24,8 +24,53 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
   const hasCollapsedItems = expandableIds.some((headingId) => collapsedIds.has(headingId));
 
   useEffect(() => {
-    const activeItem = listRef.current?.querySelector<HTMLElement>(".toc-item.is-active");
-    activeItem?.scrollIntoView({ block: "nearest" });
+    const activeAncestorIds = getHeadingAncestorIds(headings, activeHeadingId);
+
+    if (activeAncestorIds.length === 0) {
+      return;
+    }
+
+    setCollapsedIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      let changed = false;
+
+      activeAncestorIds.forEach((headingId) => {
+        if (nextIds.delete(headingId)) {
+          changed = true;
+        }
+      });
+
+      return changed ? nextIds : currentIds;
+    });
+  }, [activeHeadingId, headings]);
+
+  useEffect(() => {
+    const listElement = listRef.current;
+    const activeItem = listElement?.querySelector<HTMLElement>(".toc-item.is-active");
+
+    if (!listElement || !activeItem) {
+      return;
+    }
+
+    const listRect = listElement.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+    const edgePadding = 24;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (itemRect.top < listRect.top + edgePadding) {
+      listElement.scrollBy({
+        top: itemRect.top - listRect.top - edgePadding,
+        behavior: prefersReducedMotion ? "auto" : "smooth"
+      });
+      return;
+    }
+
+    if (itemRect.bottom > listRect.bottom - edgePadding) {
+      listElement.scrollBy({
+        top: itemRect.bottom - listRect.bottom + edgePadding,
+        behavior: prefersReducedMotion ? "auto" : "smooth"
+      });
+    }
   }, [activeHeadingId]);
 
   function toggleCollapsed(headingId: string) {
@@ -50,7 +95,7 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
   }
 
   return (
-    <nav className="toc-panel">
+    <nav className="toc-panel" aria-label="文档导航">
       <div className="toc-header">
         <div>
           <span className="toc-eyebrow">Outline</span>
@@ -66,18 +111,19 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
         </button>
       </div>
 
-      <ol className="toc-list" ref={listRef}>
+      <ol className="toc-list" ref={listRef} aria-label="标题目录">
         {tocItems.map((heading) => (
           <li key={heading.id} className={heading.isHidden ? "toc-list-item is-hidden" : "toc-list-item"}>
             <div className={`toc-row level-${heading.level}`}>
               <button
                 className={heading.id === activeHeadingId ? "toc-item is-active" : "toc-item"}
                 type="button"
+                data-heading-id={heading.id}
                 aria-current={heading.id === activeHeadingId ? "true" : undefined}
                 onClick={() => onSelectHeading(heading.id)}
               >
-              <span className="toc-index">{heading.displayIndex}</span>
-              <span>{heading.text}</span>
+                <span className="toc-index">{heading.displayIndex}</span>
+                <span>{heading.text}</span>
               </button>
               {heading.hasChildren ? (
                 <button
@@ -119,6 +165,29 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
       </section>
     </nav>
   );
+}
+
+function getHeadingAncestorIds(headings: HeadingItem[], activeHeadingId: string) {
+  const activeIndex = headings.findIndex((heading) => heading.id === activeHeadingId);
+
+  if (activeIndex < 0) {
+    return [];
+  }
+
+  const activeHeading = headings[activeIndex];
+  const ancestorIds: string[] = [];
+  let nextParentLevel = activeHeading.level - 1;
+
+  for (let index = activeIndex - 1; index >= 0 && nextParentLevel >= 1; index -= 1) {
+    const candidate = headings[index];
+
+    if (candidate.level === nextParentLevel) {
+      ancestorIds.push(candidate.id);
+      nextParentLevel -= 1;
+    }
+  }
+
+  return ancestorIds;
 }
 
 function buildTocItems(headings: HeadingItem[], collapsedIds: Set<string>): TocItem[] {

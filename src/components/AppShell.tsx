@@ -71,42 +71,61 @@ export function AppShell({
   }, [headings]);
 
   useEffect(() => {
-    if (viewMode !== "render") {
+    if (viewMode !== "render" || headings.length === 0) {
       return;
     }
 
-    const headingElements = headings
-      .map((heading) => document.getElementById(heading.id))
-      .filter((element): element is HTMLElement => element !== null);
+    let frameId: number | null = null;
 
-    if (headingElements.length === 0) {
-      return;
-    }
+    function updateActiveHeadingFromScroll() {
+      frameId = null;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (navigationInProgressRef.current) {
-          return;
-        }
-
-        const visibleHeading = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((first, second) => first.boundingClientRect.top - second.boundingClientRect.top)[0];
-
-        if (visibleHeading?.target.id) {
-          setActiveHeadingId(visibleHeading.target.id);
-        }
-      },
-      {
-        root: null,
-        rootMargin: "-18% 0px -68% 0px",
-        threshold: [0, 1]
+      if (navigationInProgressRef.current) {
+        return;
       }
-    );
 
-    headingElements.forEach((element) => observer.observe(element));
+      const headingElements = headings
+        .map((heading) => ({ heading, element: document.getElementById(heading.id) }))
+        .filter((entry): entry is { heading: HeadingItem; element: HTMLElement } => entry.element !== null);
 
-    return () => observer.disconnect();
+      if (headingElements.length === 0) {
+        return;
+      }
+
+      const activationOffset = Math.min(128, window.innerHeight * 0.24);
+      let nextActiveHeading = headingElements[0].heading;
+
+      for (const { heading, element } of headingElements) {
+        if (element.getBoundingClientRect().top > activationOffset) {
+          break;
+        }
+
+        nextActiveHeading = heading;
+      }
+
+      setActiveHeadingId((currentId) => (currentId === nextActiveHeading.id ? currentId : nextActiveHeading.id));
+    }
+
+    function scheduleActiveHeadingUpdate() {
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(updateActiveHeadingFromScroll);
+    }
+
+    scheduleActiveHeadingUpdate();
+    window.addEventListener("scroll", scheduleActiveHeadingUpdate, { passive: true });
+    window.addEventListener("resize", scheduleActiveHeadingUpdate);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      window.removeEventListener("scroll", scheduleActiveHeadingUpdate);
+      window.removeEventListener("resize", scheduleActiveHeadingUpdate);
+    };
   }, [headings, viewMode]);
 
   useEffect(() => {
@@ -130,11 +149,15 @@ export function AppShell({
 
     navigationInProgressRef.current = true;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    headingElement.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+    const activationOffset = Math.min(128, window.innerHeight * 0.24);
+    const headingTop = headingElement.getBoundingClientRect().top + window.scrollY - activationOffset;
+    const nextScrollTop = Math.max(headingTop, 0);
+    const shouldSmoothScroll = !prefersReducedMotion && Math.abs(nextScrollTop - window.scrollY) < 900;
+    window.scrollTo({ top: nextScrollTop, behavior: shouldSmoothScroll ? "smooth" : "auto" });
     setActiveHeadingId(headingId);
     window.setTimeout(() => {
       navigationInProgressRef.current = false;
-    }, 420);
+    }, shouldSmoothScroll ? 900 : 120);
   }
 
   function handleSelectHeading(headingId: string) {
@@ -229,8 +252,10 @@ export function AppShell({
               <button
                 key={item.value}
                 type="button"
+                role="tab"
                 className={isActive ? "view-button is-active" : "view-button"}
-                aria-pressed={isActive}
+                aria-controls="document-editor-surface"
+                aria-selected={isActive}
                 onClick={() => onChangeViewMode(item.value)}
               >
                 <Icon size={17} />
@@ -240,7 +265,7 @@ export function AppShell({
           })}
         </div>
 
-        <section className="editor-surface" aria-label="文档内容">
+        <section className="editor-surface" id="document-editor-surface" aria-label="文档内容">
           {viewMode === "render" && <RenderEditor markdown={markdown} filePath={filePath} onChangeMarkdown={onChangeMarkdown} />}
           {viewMode === "source" && (
             <Suspense fallback={<EmptyState title="正在准备源码视图" description="编辑器资源加载完成后即可继续精修 Markdown。" />}>

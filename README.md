@@ -65,6 +65,7 @@ npm run typecheck
 - 已完成第 6 阶段拖拽导入与最近文件：支持拖拽 Markdown 打开、非 Markdown 提示、拖拽替换前未保存保护、session-only 最近文件、侧栏最近文件列表和系统菜单最近文件。
 - 已完成第 7 阶段双栏同步编辑：源码侧和渲染编辑侧共享同一份 Markdown，双向更新使用来源与版本快照保护，避免递归回写；窄屏下双栏自动改为上下排列。
 - 已完成第 8 阶段代码块工具条与图片路径：代码块支持语言显示、复制、语言搜索选择、预览开关；渲染视图可基于当前 Markdown 文件路径解析相对图片，并为缺失图片显示占位。
+- 已完成第 9 阶段滚动联动、响应式与可访问性：阅读滚动可更新当前章节，目录跟随只滚动侧栏自身，目录点击与普通滚动逻辑分离，小屏目录抽屉和键盘焦点状态已补齐。
 - 已通过 Playwright 检查桌面和窄屏阅读视图，第二阶段移动端截图位于 `output/playwright/stage-2-mobile-preview.png`。
 - 第三阶段已通过 Playwright 检查桌面目录跳转、源码视图切回渲染定位、折叠子目录和移动端目录抽屉，截图位于 `output/playwright/stage-3-mobile-toc-drawer.png`。
 - 第四阶段已通过 Playwright 检查 CodeMirror 可编辑、切回渲染后内容同步、目录重新解析和控制台无错误，截图位于 `output/playwright/stage-4-codemirror-source.png`。
@@ -72,6 +73,7 @@ npm run typecheck
 - 第六阶段已通过 Playwright 注入测试版拖拽/最近文件 API 检查 Markdown 拖入、非 Markdown 提示、未保存取消保护、最近文件排序和控制台无错误，截图位于 `output/playwright/stage-6-drag-recent-files.png`。
 - 第七阶段已通过 Playwright 检查源码视图编辑后切入双栏、源码侧编辑更新渲染编辑侧、渲染编辑侧回写源码侧、表格与任务列表内容保留、桌面双列布局、窄屏单列布局、滚动保持和控制台无错误，截图位于 `output/playwright/stage-7-audit.png`。
 - 第八阶段已通过 Playwright 检查代码复制、语言搜索筛选、语言选择写回 Markdown 围栏、预览开关、相对图片解析、缺失图片占位、移动端无横向溢出和控制台无错误，截图位于 `output/playwright/stage-8-code-image-tools.png`。
+- 第九阶段已通过 Playwright 检查普通滚动目录高亮、侧栏跟随不影响正文滚动、目录点击定位、折叠父级自动展开、移动端目录抽屉、键盘焦点可见和控制台无错误，截图位于 `output/playwright/stage-9-scroll-responsive-a11y.png`。
 
 ## 本地版本控制建议
 
