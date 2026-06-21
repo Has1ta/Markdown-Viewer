@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld("markdownViewer", {
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
   openMarkdownFile: () => ipcRenderer.invoke("file:open-markdown"),
   openMarkdownFileByPath: (filePath: string) => ipcRenderer.invoke("file:open-markdown-by-path", filePath),
+  resolveAssetUrl: (payload: { documentPath: string | null; assetPath: string }) =>
+    ipcRenderer.invoke("file:resolve-asset-url", payload),
   saveMarkdownFile: (payload: { filePath: string | null; content: string; defaultFileName: string }) =>
     ipcRenderer.invoke("file:save-markdown", payload),
   saveMarkdownFileAs: (payload: { content: string; defaultFileName: string }) =>

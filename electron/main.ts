@@ -1,7 +1,13 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { openMarkdownFile, readMarkdownFileByPath, saveMarkdownFile, saveMarkdownFileAs } from "./file-service.js";
+import {
+  openMarkdownFile,
+  readMarkdownFileByPath,
+  resolveMarkdownAssetUrl,
+  saveMarkdownFile,
+  saveMarkdownFileAs
+} from "./file-service.js";
 import { buildApplicationMenu, type RecentFileMenuItem } from "./menu.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -132,6 +138,10 @@ ipcMain.handle(
 );
 
 ipcMain.handle("recent-files:get", () => recentFiles);
+
+ipcMain.handle("file:resolve-asset-url", (_event, payload: { documentPath: string | null; assetPath: string }) =>
+  resolveMarkdownAssetUrl(payload.documentPath, payload.assetPath)
+);
 
 ipcMain.on("document:set-edited", (event, isEdited: boolean) => {
   BrowserWindow.fromWebContents(event.sender)?.setDocumentEdited(isEdited);

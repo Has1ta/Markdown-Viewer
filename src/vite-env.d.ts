@@ -32,6 +32,7 @@ interface Window {
     getPathForFile: (file: File) => string;
     openMarkdownFile: () => Promise<MarkdownFileResult>;
     openMarkdownFileByPath: (filePath: string) => Promise<MarkdownFileResult>;
+    resolveAssetUrl: (payload: { documentPath: string | null; assetPath: string }) => Promise<string | null>;
     saveMarkdownFile: (payload: {
       filePath: string | null;
       content: string;

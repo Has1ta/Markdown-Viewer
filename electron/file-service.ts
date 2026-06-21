@@ -1,6 +1,7 @@
 import { BrowserWindow, dialog } from "electron";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 export interface MarkdownFileResult {
   canceled: boolean;
@@ -126,4 +127,51 @@ function ensureMarkdownExtension(filePath: string) {
 
 export function isMarkdownFilePath(filePath: string) {
   return /\.(md|markdown|mdown|mkd)$/i.test(filePath);
+}
+
+export async function resolveMarkdownAssetUrl(documentPath: string | null, assetPath: string) {
+  if (!documentPath || !assetPath || isRemoteUrl(assetPath) || assetPath.startsWith("#") || assetPath.startsWith("data:")) {
+    return null;
+  }
+
+  const documentDirectory = path.dirname(documentPath);
+  const decodedAssetPath = safelyDecodePath(assetPath);
+
+  if (decodedAssetPath === null) {
+    return null;
+  }
+
+  const resolvedPath = path.resolve(documentDirectory, decodedAssetPath);
+
+  if (!isPathInside(documentDirectory, resolvedPath) || !isSupportedImagePath(resolvedPath)) {
+    return null;
+  }
+
+  try {
+    await access(resolvedPath);
+    return pathToFileURL(resolvedPath).toString();
+  } catch {
+    return null;
+  }
+}
+
+function isRemoteUrl(value: string) {
+  return /^(https?:|file:|blob:)/i.test(value);
+}
+
+function isSupportedImagePath(filePath: string) {
+  return /\.(apng|avif|gif|jpe?g|png|svg|webp)$/i.test(filePath);
+}
+
+function isPathInside(parentPath: string, childPath: string) {
+  const relativePath = path.relative(parentPath, childPath);
+  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
+}
+
+function safelyDecodePath(assetPath: string) {
+  try {
+    return decodeURIComponent(assetPath);
+  } catch {
+    return null;
+  }
 }

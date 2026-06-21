@@ -62,5 +62,7 @@
 - 渲染编辑侧当前使用 Crepe/Milkdown；外部写入应通过编辑器 API 同步并用 `isApplyingExternalRef` 抑制回写，避免右侧接收源码变化时再次触发父级更新。
 - CodeMirror 的 `updateListener` 不应逐事务同步调用父级 `setMarkdown`；源码侧输入应按 animation frame 合并为最新 Markdown 再上抛，避免快速输入造成 React 嵌套更新。
 - Crepe 相关资源目前只在双栏视图懒加载；后续若调整功能插件或打包分块，应同时检查 `npm run build` 的 chunk 体积和默认渲染视图首屏资源。
+- 做代码块工具条相关修改时，应保持 `RenderEditor` 事件代理方式，语言选择需要写回 fenced code block 的 info string，复制结果用按钮状态和 aria-live 通知反馈。
+- 做本地图片路径相关修改时，不能在渲染层直接拼接 Windows 本地路径；应通过 preload 白名单 API 让主进程校验 Markdown 文件目录、图片扩展名和 `file://` URL。
 - 做本地文件工作流相关修改时，所有文件读写必须通过 preload 暴露的白名单 API；打开文件、拖拽替换、窗口关闭等危险操作必须复用同一个未保存确认流程。
 - 最近文件只保持 session-only，不做持久化；拖拽文件路径应优先通过 preload 暴露的 `webUtils.getPathForFile(file)` 获取，并保持 `navigateOnDragDrop: false` 防止误导航。

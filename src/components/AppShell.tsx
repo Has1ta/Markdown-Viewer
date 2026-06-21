@@ -241,7 +241,7 @@ export function AppShell({
         </div>
 
         <section className="editor-surface" aria-label="文档内容">
-          {viewMode === "render" && <RenderEditor markdown={markdown} />}
+          {viewMode === "render" && <RenderEditor markdown={markdown} filePath={filePath} onChangeMarkdown={onChangeMarkdown} />}
           {viewMode === "source" && (
             <Suspense fallback={<EmptyState title="正在准备源码视图" description="编辑器资源加载完成后即可继续精修 Markdown。" />}>
               <SourceEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />
