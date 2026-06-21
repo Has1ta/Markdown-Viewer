@@ -69,7 +69,7 @@ npm run typecheck
 - 第四阶段已通过 Playwright 检查 CodeMirror 可编辑、切回渲染后内容同步、目录重新解析和控制台无错误，截图位于 `output/playwright/stage-4-codemirror-source.png`。
 - 第五阶段已通过 Playwright 注入测试版文件 API 检查打开、保存、另存为、未保存取消保护、窗口标题未保存标记和控制台无错误，截图位于 `output/playwright/stage-5-unsaved-dialog.png`。
 - 第六阶段已通过 Playwright 注入测试版拖拽/最近文件 API 检查 Markdown 拖入、非 Markdown 提示、未保存取消保护、最近文件排序和控制台无错误，截图位于 `output/playwright/stage-6-drag-recent-files.png`。
-- 第七阶段已通过 Playwright 检查源码侧编辑更新渲染编辑侧、渲染编辑侧回写源码侧、表格与任务列表内容保留、桌面双列布局、窄屏单列布局和控制台无错误，截图位于 `output/playwright/stage-7-split-sync.png`。
+- 第七阶段已通过 Playwright 检查源码视图编辑后切入双栏、源码侧编辑更新渲染编辑侧、渲染编辑侧回写源码侧、表格与任务列表内容保留、桌面双列布局、窄屏单列布局、滚动保持和控制台无错误，截图位于 `output/playwright/stage-7-audit.png`。
 
 ## 本地版本控制建议
 

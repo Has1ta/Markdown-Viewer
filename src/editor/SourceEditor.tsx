@@ -23,6 +23,8 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
   const editorHostRef = useRef<HTMLDivElement | null>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChangeMarkdown);
+  const pendingMarkdownRef = useRef<string | null>(null);
+  const changeFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     onChangeRef.current = onChangeMarkdown;
@@ -56,7 +58,7 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
             const isExternalUpdate = update.transactions.some((transaction) => transaction.annotation(Transaction.remote));
 
             if (update.docChanged && !isExternalUpdate) {
-              onChangeRef.current(update.state.doc.toString());
+              scheduleMarkdownChange(update.state.doc.toString());
             }
           })
         ]
@@ -66,6 +68,7 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
     editorViewRef.current = editorView;
 
     return () => {
+      cancelPendingMarkdownChange();
       editorView.destroy();
       editorViewRef.current = null;
     };
@@ -78,6 +81,7 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
       return;
     }
 
+    cancelPendingMarkdownChange();
     editorView.dispatch({
       changes: {
         from: 0,
@@ -87,6 +91,33 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
       annotations: Transaction.remote.of(true)
     });
   }, [markdown]);
+
+  function scheduleMarkdownChange(nextMarkdown: string) {
+    pendingMarkdownRef.current = nextMarkdown;
+
+    if (changeFrameRef.current !== null) {
+      return;
+    }
+
+    changeFrameRef.current = window.requestAnimationFrame(() => {
+      changeFrameRef.current = null;
+      const pendingMarkdown = pendingMarkdownRef.current;
+      pendingMarkdownRef.current = null;
+
+      if (pendingMarkdown !== null) {
+        onChangeRef.current(pendingMarkdown);
+      }
+    });
+  }
+
+  function cancelPendingMarkdownChange() {
+    if (changeFrameRef.current !== null) {
+      window.cancelAnimationFrame(changeFrameRef.current);
+      changeFrameRef.current = null;
+    }
+
+    pendingMarkdownRef.current = null;
+  }
 
   return <div className="source-editor" ref={editorHostRef} aria-label="Markdown 源码编辑器" />;
 }

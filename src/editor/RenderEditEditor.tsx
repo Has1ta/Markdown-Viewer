@@ -15,6 +15,7 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
   const markdownRef = useRef(markdown);
   const onChangeRef = useRef(onChangeMarkdown);
   const isApplyingExternalRef = useRef(false);
+  const externalSyncTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     onChangeRef.current = onChangeMarkdown;
@@ -27,7 +28,12 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
 
     let isDisposed = false;
     const crepe = createCrepe(editorHostRef.current, markdownRef.current, (nextMarkdown) => {
-      if (isApplyingExternalRef.current || markdownRef.current === nextMarkdown) {
+      if (isApplyingExternalRef.current) {
+        markdownRef.current = nextMarkdown;
+        return;
+      }
+
+      if (markdownRef.current === nextMarkdown) {
         return;
       }
 
@@ -42,12 +48,16 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
       }
 
       crepeRef.current = crepe;
-      syncCrepeMarkdown(crepe, markdownRef.current, null, isApplyingExternalRef);
+      syncCrepeMarkdown(crepe, markdownRef.current, null, isApplyingExternalRef, externalSyncTimerRef);
     });
 
     return () => {
       isDisposed = true;
       crepeRef.current = null;
+      if (externalSyncTimerRef.current !== null) {
+        window.clearTimeout(externalSyncTimerRef.current);
+        externalSyncTimerRef.current = null;
+      }
       void crepe.destroy();
     };
   }, []);
@@ -65,7 +75,7 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
     }
 
     const scrollHost = editorHostRef.current?.querySelector<HTMLElement>(".milkdown");
-    syncCrepeMarkdown(crepe, markdown, scrollHost ?? null, isApplyingExternalRef);
+    syncCrepeMarkdown(crepe, markdown, scrollHost ?? null, isApplyingExternalRef, externalSyncTimerRef);
     markdownRef.current = markdown;
   }, [markdown]);
 
@@ -97,7 +107,8 @@ function syncCrepeMarkdown(
   crepe: Crepe,
   markdown: string,
   scrollHost: HTMLElement | null,
-  isApplyingExternalRef: MutableRefObject<boolean>
+  isApplyingExternalRef: MutableRefObject<boolean>,
+  externalSyncTimerRef: MutableRefObject<number | null>
 ) {
   if (crepe.getMarkdown() === markdown) {
     return;
@@ -105,14 +116,22 @@ function syncCrepeMarkdown(
 
   const scrollTop = scrollHost?.scrollTop ?? 0;
 
+  if (externalSyncTimerRef.current !== null) {
+    window.clearTimeout(externalSyncTimerRef.current);
+    externalSyncTimerRef.current = null;
+  }
+
   isApplyingExternalRef.current = true;
   crepe.editor.action(replaceAll(markdown, true));
-  window.queueMicrotask(() => {
-    isApplyingExternalRef.current = false;
+  window.requestAnimationFrame(() => {
     if (scrollHost) {
       scrollHost.scrollTop = scrollTop;
     }
   });
+  externalSyncTimerRef.current = window.setTimeout(() => {
+    isApplyingExternalRef.current = false;
+    externalSyncTimerRef.current = null;
+  }, 250);
 }
 
 export default RenderEditEditor;

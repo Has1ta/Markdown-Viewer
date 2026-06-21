@@ -60,6 +60,7 @@
 - CodeMirror 依赖应保持懒加载和独立 chunk，避免默认渲染视图首包明显变大。
 - 做双栏编辑相关修改时，应继续保持 `markdown` 作为单一真相源；源码侧和渲染编辑侧只能通过来源与版本快照协调，不能让两个编辑器各自持有独立文档真相。
 - 渲染编辑侧当前使用 Crepe/Milkdown；外部写入应通过编辑器 API 同步并用 `isApplyingExternalRef` 抑制回写，避免右侧接收源码变化时再次触发父级更新。
+- CodeMirror 的 `updateListener` 不应逐事务同步调用父级 `setMarkdown`；源码侧输入应按 animation frame 合并为最新 Markdown 再上抛，避免快速输入造成 React 嵌套更新。
 - Crepe 相关资源目前只在双栏视图懒加载；后续若调整功能插件或打包分块，应同时检查 `npm run build` 的 chunk 体积和默认渲染视图首屏资源。
 - 做本地文件工作流相关修改时，所有文件读写必须通过 preload 暴露的白名单 API；打开文件、拖拽替换、窗口关闭等危险操作必须复用同一个未保存确认流程。
 - 最近文件只保持 session-only，不做持久化；拖拽文件路径应优先通过 preload 暴露的 `webUtils.getPathForFile(file)` 获取，并保持 `navigateOnDragDrop: false` 防止误导航。
