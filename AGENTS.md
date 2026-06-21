@@ -30,7 +30,7 @@
 - `软件制作方案.md`：软件技术路线、阶段计划、多 AGENTS 分工和验收清单。
 - `package.json`：Electron + Vite + React + TypeScript 工程脚本和依赖。
 - `package-lock.json`：npm 依赖锁定文件。
-- `electron/`：桌面窗口、preload 和系统菜单骨架。
+- `electron/`：桌面窗口、preload、安全文件 API、系统菜单和本地文件读写服务。
 - `src/`：React 应用源码、Markdown 工具函数、样式和示例数据。
 - `public/`：静态资源，例如 favicon 和示例文档图片。
 - `output/playwright/`：阶段性视觉验证截图。
@@ -58,3 +58,4 @@
 - 做目录导航相关修改时，应区分“点击目录触发正文滚动”和“普通阅读滚动更新当前章节高亮”；侧栏自动跟随只能滚动侧栏自身，不能反向滚动正文。
 - 做源码编辑器相关修改时，应保持 `markdown` 字符串作为单一真相源；CodeMirror 只负责编辑表面，外部内容变化必须同步进编辑器但不能造成重复回写循环。
 - CodeMirror 依赖应保持懒加载和独立 chunk，避免默认渲染视图首包明显变大。
+- 做本地文件工作流相关修改时，所有文件读写必须通过 preload 暴露的白名单 API；打开文件、拖拽替换、窗口关闭等危险操作必须复用同一个未保存确认流程。

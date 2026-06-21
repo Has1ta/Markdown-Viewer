@@ -45,9 +45,9 @@ npm run typecheck
 
 ## 当前源码结构
 
-- `electron/`：Electron 主进程、preload 和系统菜单骨架。
+- `electron/`：Electron 主进程、preload、安全文件 API、系统菜单和本地文件读写服务。
 - `src/app/`：应用状态、类型和入口组件。
-- `src/components/`：应用外壳、侧栏、文档头、空状态和底部操作栏。
+- `src/components/`：应用外壳、侧栏、文档头、空状态、未保存确认弹窗和底部操作栏。
 - `src/editor/`：渲染视图、CodeMirror 源码视图、双栏视图和源码编辑器主题。
 - `src/markdown/`：标题解析、锚点生成和文档统计工具函数。
 - `src/styles/`：由 `STYLE.md` 落地的设计令牌、应用布局、Markdown 排版和响应式样式。
@@ -61,9 +61,11 @@ npm run typecheck
 - 已完成第 2 阶段静态渲染阅读体验：标题、段落、链接、图片、列表、任务列表、引用、表格、行内代码、代码块、分割线、空状态和加载状态均有基础渲染与样式。
 - 已完成第 3 阶段目录生成与侧栏导航：目录自动生成层级编号，支持折叠子目录、当前章节高亮、点击平滑跳转、源码视图点击目录自动切回渲染视图、移动端目录抽屉。
 - 已完成第 4 阶段源码编辑视图：源码模式接入 CodeMirror 6，支持行号、当前行、括号匹配、历史记录、软换行、Markdown 语法高亮和暖白主题，并以懒加载方式隔离编辑器体积。
+- 已完成第 5 阶段本地文件工作流：支持打开 Markdown 文件、保存、另存为、未保存确认、窗口关闭保护、菜单快捷键和窗口标题未保存标记。
 - 已通过 Playwright 检查桌面和窄屏阅读视图，第二阶段移动端截图位于 `output/playwright/stage-2-mobile-preview.png`。
 - 第三阶段已通过 Playwright 检查桌面目录跳转、源码视图切回渲染定位、折叠子目录和移动端目录抽屉，截图位于 `output/playwright/stage-3-mobile-toc-drawer.png`。
 - 第四阶段已通过 Playwright 检查 CodeMirror 可编辑、切回渲染后内容同步、目录重新解析和控制台无错误，截图位于 `output/playwright/stage-4-codemirror-source.png`。
+- 第五阶段已通过 Playwright 注入测试版文件 API 检查打开、保存、另存为、未保存取消保护、窗口标题未保存标记和控制台无错误，截图位于 `output/playwright/stage-5-unsaved-dialog.png`。
 
 ## 本地版本控制建议
 

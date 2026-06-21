@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useRef, useState, type ComponentType } from "react";
-import { ArrowUp, Copy, Download, MessageSquareText, PanelLeft, Save, X } from "lucide-react";
+import { ArrowUp, FolderOpen, PanelLeft, Save, SaveAll, X } from "lucide-react";
 import type { DocumentStats, HeadingItem, ViewMode } from "../app/app-types";
 import { BottomBar } from "./BottomBar";
 import { DocumentHeader } from "./DocumentHeader";
@@ -22,6 +22,9 @@ interface AppShellProps {
   stats: DocumentStats;
   onChangeMarkdown: (markdown: string) => void;
   onChangeViewMode: (viewMode: ViewMode) => void;
+  onOpenFile: () => void;
+  onSaveFile: () => void;
+  onSaveFileAs: () => void;
 }
 
 export function AppShell({
@@ -35,7 +38,10 @@ export function AppShell({
   headings,
   stats,
   onChangeMarkdown,
-  onChangeViewMode
+  onChangeViewMode,
+  onOpenFile,
+  onSaveFile,
+  onSaveFileAs
 }: AppShellProps) {
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
   const [pendingHeadingId, setPendingHeadingId] = useState<string | null>(null);
@@ -195,11 +201,10 @@ export function AppShell({
 
         <BottomBar
           actions={[
-            { label: "返回顶部", icon: ArrowUp },
-            { label: "内容反馈", icon: MessageSquareText },
-            { label: "复制链接", icon: Copy },
-            { label: "导出", icon: Download },
-            { label: "保存", icon: Save, primary: true }
+            { label: "返回顶部", icon: ArrowUp, onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+            { label: "打开", icon: FolderOpen, onClick: onOpenFile },
+            { label: "另存为", icon: SaveAll, onClick: onSaveFileAs },
+            { label: "保存", icon: Save, primary: true, onClick: onSaveFile }
           ]}
         />
       </main>

@@ -1,4 +1,8 @@
-import { app, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, MenuItemConstructorOptions } from "electron";
+
+function sendCommand(command: string) {
+  BrowserWindow.getFocusedWindow()?.webContents.send("app:menu-command", command);
+}
 
 export function buildApplicationMenu(): MenuItemConstructorOptions[] {
   return [
@@ -8,12 +12,17 @@ export function buildApplicationMenu(): MenuItemConstructorOptions[] {
         {
           label: "打开",
           accelerator: "CmdOrCtrl+O",
-          enabled: false
+          click: () => sendCommand("open")
         },
         {
           label: "保存",
           accelerator: "CmdOrCtrl+S",
-          enabled: false
+          click: () => sendCommand("save")
+        },
+        {
+          label: "另存为",
+          accelerator: "CmdOrCtrl+Shift+S",
+          click: () => sendCommand("save-as")
         },
         { type: "separator" },
         {
