@@ -409,12 +409,51 @@ input:focus-visible,
 }
 
 .document-title-row h1 {
+  min-width: 0;
   margin: 0;
   color: var(--text-primary);
   font-family: var(--font-serif);
   font-size: 52px;
   font-weight: 500;
   line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.document-title-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.document-open-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.document-open-button:hover {
+  border-color: var(--accent-soft);
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.document-open-button svg {
+  color: var(--accent-primary);
 }
 
 .status-pill {

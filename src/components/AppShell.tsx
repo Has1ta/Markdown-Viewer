@@ -241,6 +241,7 @@ export function AppShell({
           isDirty={isDirty}
           lastSavedLabel={lastSavedLabel}
           stats={stats}
+          onOpenFile={onOpenFile}
         />
 
         <div className="view-switcher" role="tablist" aria-label="视图模式">

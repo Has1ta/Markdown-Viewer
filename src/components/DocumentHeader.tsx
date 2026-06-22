@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, FolderOpen } from "lucide-react";
 import type { DocumentStats } from "../app/app-types";
 
 interface DocumentHeaderProps {
@@ -7,9 +7,10 @@ interface DocumentHeaderProps {
   isDirty: boolean;
   lastSavedLabel: string;
   stats: DocumentStats;
+  onOpenFile: () => void;
 }
 
-export function DocumentHeader({ fileName, filePath, isDirty, lastSavedLabel, stats }: DocumentHeaderProps) {
+export function DocumentHeader({ fileName, filePath, isDirty, lastSavedLabel, stats, onOpenFile }: DocumentHeaderProps) {
   return (
     <header className="document-header">
       <div className="document-kicker">
@@ -18,7 +19,13 @@ export function DocumentHeader({ fileName, filePath, isDirty, lastSavedLabel, st
       </div>
       <div className="document-title-row">
         <h1>{fileName.replace(/\.(md|markdown)$/i, "")}</h1>
-        <span className={isDirty ? "status-pill is-dirty" : "status-pill"}>{isDirty ? "未保存" : "已同步"}</span>
+        <div className="document-title-actions">
+          <button className="document-open-button" type="button" onClick={onOpenFile}>
+            <FolderOpen size={17} />
+            <span>打开文件</span>
+          </button>
+          <span className={isDirty ? "status-pill is-dirty" : "status-pill"}>{isDirty ? "未保存" : "已同步"}</span>
+        </div>
       </div>
       <div className="document-meta" aria-label="文档统计">
         <span>{stats.characters} 字符</span>

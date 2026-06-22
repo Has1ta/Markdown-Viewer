@@ -17,6 +17,7 @@
 - 对用户已有文件保持谨慎，不做无关重构，不删除用户未明确要求删除的内容。
 - 修改文档时优先保持 UTF-8 编码。
 - Markdown 和常见源码文本遵循 `.gitattributes` 中的换行规范。
+- 每次完成代码修改后，除非用户明确要求跳过或当前环境无法打包，应自动执行 `npm run dist`，把最新代码重新打包到 Windows 安装包和便携版中。
 - Git 提交应按阶段进行，提交信息用简短中文描述。
 
 ## 当前文件说明
@@ -58,6 +59,7 @@
 - 如果项目从文档阶段进入可运行应用阶段，应建立明确的提交节奏，例如需求整理、UI 原型、核心功能、打包发布分别提交。
 - 进入源码阶段后，应以 `软件制作方案.md` 的阶段划分为主线推进，阶段完成后更新验收状态。
 - 当前源码阶段使用 `npm run dev` 启动 Electron 开发窗口，使用 `npm run lint` 检查代码，使用 `npm test` 运行工具函数测试，使用 `npm run build` 验证 TypeScript 与 Vite 生产构建，使用 `npm run dist` 生成 Windows 安装包和便携版。
+- 代码修改完成后的标准收尾顺序建议为：先运行必要的 lint/test/build 或界面验证，再运行 `npm run dist`，最后确认 `release/Markdown Viewer Portable 0.1.0.exe` 和安装包的修改时间已经更新。
 - `dist/`、`dist-electron/`、`node_modules/` 和打包产物不应提交到 Git。
 - Electron 打包时应用代码已经由 Vite/Electron 编译进 `dist/` 与 `dist-electron/`，前端库默认应保持在 `devDependencies`，避免发布包重复携带运行时不需要的 `node_modules`。
 - Windows 打包默认只保留 `zh-CN.pak` 和 `en-US.pak`；如果未来扩展多语言，应同步调整 `scripts/after-pack.cjs` 并重新记录包体积。
