@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld("markdownViewer", {
     ipcRenderer.invoke("file:save-markdown", payload),
   saveMarkdownFileAs: (payload: { content: string; defaultFileName: string }) =>
     ipcRenderer.invoke("file:save-markdown-as", payload),
+  notifyReady: () => ipcRenderer.send("app:renderer-ready"),
   setDocumentEdited: (isEdited: boolean) => ipcRenderer.send("document:set-edited", isEdited),
   confirmClose: (shouldClose: boolean) => ipcRenderer.send("app:close-response", shouldClose),
   getRecentFiles: () => ipcRenderer.invoke("recent-files:get"),

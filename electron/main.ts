@@ -15,9 +15,12 @@ const __dirname = path.dirname(__filename);
 
 const isDev = !app.isPackaged;
 let isForceClosing = false;
+let isRendererReady = false;
 const recentFiles: RecentFileMenuItem[] = [];
 
 function createMainWindow() {
+  isRendererReady = false;
+
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -40,8 +43,16 @@ function createMainWindow() {
     return { action: "deny" };
   });
 
+  mainWindow.webContents.on("did-fail-load", () => {
+    isRendererReady = false;
+  });
+
+  mainWindow.webContents.on("render-process-gone", () => {
+    isRendererReady = false;
+  });
+
   mainWindow.on("close", (event) => {
-    if (isForceClosing) {
+    if (isForceClosing || !isRendererReady) {
       return;
     }
 
@@ -145,6 +156,10 @@ ipcMain.handle("file:resolve-asset-url", (_event, payload: { documentPath: strin
 
 ipcMain.on("document:set-edited", (event, isEdited: boolean) => {
   BrowserWindow.fromWebContents(event.sender)?.setDocumentEdited(isEdited);
+});
+
+ipcMain.on("app:renderer-ready", () => {
+  isRendererReady = true;
 });
 
 ipcMain.on("app:close-response", (event, shouldClose: boolean) => {

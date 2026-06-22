@@ -39,6 +39,7 @@ interface Window {
       defaultFileName: string;
     }) => Promise<MarkdownSaveResult>;
     saveMarkdownFileAs: (payload: { content: string; defaultFileName: string }) => Promise<MarkdownSaveResult>;
+    notifyReady: () => void;
     setDocumentEdited: (isEdited: boolean) => void;
     confirmClose: (shouldClose: boolean) => void;
     getRecentFiles: () => Promise<RecentMarkdownFile[]>;

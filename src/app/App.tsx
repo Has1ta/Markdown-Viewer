@@ -36,6 +36,10 @@ export function App() {
   const lastSavedLabel = lastSavedAt ? `保存于 ${formatSavedTime(lastSavedAt)}` : initialAppState.lastSavedLabel;
 
   useEffect(() => {
+    window.markdownViewer?.notifyReady();
+  }, []);
+
+  useEffect(() => {
     isDirtyRef.current = isDirty;
     window.markdownViewer?.setDocumentEdited(isDirty);
     document.title = `${isDirty ? "• " : ""}${fileName} - Markdown Viewer v2`;

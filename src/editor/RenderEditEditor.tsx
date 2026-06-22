@@ -1,7 +1,24 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
-import { Crepe } from "@milkdown/crepe";
+import { CrepeBuilder } from "@milkdown/crepe/builder";
+import { blockEdit } from "@milkdown/crepe/feature/block-edit";
+import { cursor } from "@milkdown/crepe/feature/cursor";
+import { imageBlock } from "@milkdown/crepe/feature/image-block";
+import { linkTooltip } from "@milkdown/crepe/feature/link-tooltip";
+import { listItem } from "@milkdown/crepe/feature/list-item";
+import { placeholder } from "@milkdown/crepe/feature/placeholder";
+import { table } from "@milkdown/crepe/feature/table";
+import { toolbar } from "@milkdown/crepe/feature/toolbar";
 import { replaceAll } from "@milkdown/utils";
-import "@milkdown/crepe/theme/common/style.css";
+import "@milkdown/crepe/theme/common/prosemirror.css";
+import "@milkdown/crepe/theme/common/reset.css";
+import "@milkdown/crepe/theme/common/cursor.css";
+import "@milkdown/crepe/theme/common/list-item.css";
+import "@milkdown/crepe/theme/common/link-tooltip.css";
+import "@milkdown/crepe/theme/common/image-block.css";
+import "@milkdown/crepe/theme/common/block-edit.css";
+import "@milkdown/crepe/theme/common/placeholder.css";
+import "@milkdown/crepe/theme/common/toolbar.css";
+import "@milkdown/crepe/theme/common/table.css";
 import "@milkdown/crepe/theme/frame.css";
 
 interface RenderEditEditorProps {
@@ -11,7 +28,7 @@ interface RenderEditEditorProps {
 
 export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEditorProps) {
   const editorHostRef = useRef<HTMLDivElement | null>(null);
-  const crepeRef = useRef<Crepe | null>(null);
+  const crepeRef = useRef<CrepeBuilder | null>(null);
   const markdownRef = useRef(markdown);
   const onChangeRef = useRef(onChangeMarkdown);
   const isApplyingExternalRef = useRef(false);
@@ -83,16 +100,18 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
 }
 
 function createCrepe(root: HTMLElement, defaultValue: string, onMarkdownUpdated: (markdown: string) => void) {
-  const crepe = new Crepe({
+  const crepe = new CrepeBuilder({
     root,
-    defaultValue,
-    features: {
-      [Crepe.Feature.AI]: false,
-      [Crepe.Feature.CodeMirror]: false,
-      [Crepe.Feature.Latex]: false,
-      [Crepe.Feature.TopBar]: false
-    }
-  });
+    defaultValue
+  })
+    .addFeature(cursor)
+    .addFeature(listItem)
+    .addFeature(linkTooltip)
+    .addFeature(imageBlock)
+    .addFeature(blockEdit)
+    .addFeature(placeholder)
+    .addFeature(toolbar)
+    .addFeature(table);
 
   crepe.on((listener) => {
     listener.markdownUpdated((_, nextMarkdown) => {
@@ -104,7 +123,7 @@ function createCrepe(root: HTMLElement, defaultValue: string, onMarkdownUpdated:
 }
 
 function syncCrepeMarkdown(
-  crepe: Crepe,
+  crepe: CrepeBuilder,
   markdown: string,
   scrollHost: HTMLElement | null,
   isApplyingExternalRef: MutableRefObject<boolean>,
