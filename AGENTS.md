@@ -34,12 +34,15 @@
 - `eslint.config.js`：ESLint 扁平配置，用于第十阶段代码检查。
 - `electron/`：桌面窗口、preload、安全文件 API、系统菜单和本地文件读写服务。
 - `src/`：React 应用源码、Markdown 工具函数、样式和示例数据。
-- `public/`：静态资源，例如 favicon 和示例文档图片。
-- `scripts/`：打包钩子脚本，例如保留中英文 Electron locale 的 `after-pack.cjs`。
+- `src/assets/`：由源码导入并参与 Vite 打包的内置示例图片等资源。
+- `public/`：静态资源，例如 favicon 等需要固定根路径的公开资源。
+- `public/app-icon.ico`：Electron 主窗口与打包程序图标的统一来源资源，更新图标时应与 `public/favicon.svg` 保持风格一致；`public/app-icon.png` 作为位图备份保留。
+- `scripts/`：打包钩子脚本，例如保留中英文 Electron locale 的 `after-pack.cjs`，以及生成 release 卸载辅助文件的 `write-release-uninstaller.cjs`。
 - `tests/`：Markdown 工具函数等自动化测试。
 - `docs/`：测试、打包与发布记录。
 - `CHANGELOG.md`：版本变更记录。
 - `output/playwright/`：阶段性视觉验证截图。
+- `release/`：`npm run dist` 生成的发布目录，包含安装包、便携版、解压版、`README.txt` 和卸载辅助入口；该目录不提交到 Git。
 
 ## 多 AGENTS 协作建议
 
@@ -61,6 +64,8 @@
 - 当前源码阶段使用 `npm run dev` 启动 Electron 开发窗口，使用 `npm run lint` 检查代码，使用 `npm test` 运行工具函数测试，使用 `npm run build` 验证 TypeScript 与 Vite 生产构建，使用 `npm run dist` 生成 Windows 安装包和便携版。
 - 代码修改完成后的标准收尾顺序建议为：先运行必要的 lint/test/build 或界面验证，再运行 `npm run dist`，最后确认 `release/Markdown Viewer Portable 0.1.0.exe` 和安装包的修改时间已经更新。
 - `dist/`、`dist-electron/`、`node_modules/` 和打包产物不应提交到 Git。
+- `release/uninstall.cmd` 与 `release/uninstall.ps1` 由 `scripts/write-release-uninstaller.cjs` 自动生成，用于查找 Windows 已安装版本的官方卸载命令；便携版移除方式仍是删除便携 exe。
+- 安装版通过 electron-builder `fileAssociations` 注册 `.md`、`.markdown`、`.mdown`、`.mkd` 文件关联，并使用 NSIS `perMachine: true` 保证 Windows 文件关联生效；便携版不自动注册文件关联。
 - Electron 打包时应用代码已经由 Vite/Electron 编译进 `dist/` 与 `dist-electron/`，前端库默认应保持在 `devDependencies`，避免发布包重复携带运行时不需要的 `node_modules`。
 - Windows 打包默认只保留 `zh-CN.pak` 和 `en-US.pak`；如果未来扩展多语言，应同步调整 `scripts/after-pack.cjs` 并重新记录包体积。
 - Vite 的 `base` 必须保持为 `./`，否则 Electron 打包后通过 `file://` 加载时会把 `/assets/...` 指向磁盘根目录，造成窗口空白。
@@ -76,7 +81,7 @@
 - CodeMirror 的 `updateListener` 不应逐事务同步调用父级 `setMarkdown`；源码侧输入应按 animation frame 合并为最新 Markdown 再上抛，避免快速输入造成 React 嵌套更新。
 - Crepe 相关资源目前只在双栏视图懒加载；后续若调整功能插件或打包分块，应同时检查 `npm run build` 的 chunk 体积和默认渲染视图首屏资源。
 - 渲染编辑侧应优先使用 `CrepeBuilder` 加按需 feature 导入，不要轻易改回 `@milkdown/crepe` 根入口；样式也应按当前启用功能导入，避免把已关闭的 AI、Latex、内置 CodeMirror 和 KaTeX 资源重新打进产物。
-- 做代码块工具条相关修改时，应保持 `RenderEditor` 事件代理方式，语言选择需要写回 fenced code block 的 info string，复制结果用按钮状态和 aria-live 通知反馈。
+- 做代码块工具条相关修改时，应保持 `RenderEditor` 事件代理方式，语言选择需要写回 fenced code block 的 info string，复制结果用按钮状态、Toast 和 aria-live 通知反馈。
 - 做本地图片路径相关修改时，不能在渲染层直接拼接 Windows 本地路径；应通过 preload 白名单 API 让主进程校验 Markdown 文件目录、图片扩展名和 `file://` URL。
 - 做本地文件工作流相关修改时，所有文件读写必须通过 preload 暴露的白名单 API；打开文件、拖拽替换、窗口关闭等危险操作必须复用同一个未保存确认流程。
 - 最近文件只保持 session-only，不做持久化；拖拽文件路径应优先通过 preload 暴露的 `webUtils.getPathForFile(file)` 获取，并保持 `navigateOnDragDrop: false` 防止误导航。

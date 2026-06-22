@@ -1,7 +1,9 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  isMarkdownFilePath,
   openMarkdownFile,
   readMarkdownFileByPath,
   resolveMarkdownAssetUrl,
@@ -16,17 +18,31 @@ const __dirname = path.dirname(__filename);
 const isDev = !app.isPackaged;
 let isForceClosing = false;
 let isRendererReady = false;
+let mainWindow: BrowserWindow | null = null;
+let pendingOpenFilePath: string | null = findMarkdownFileArgument(process.argv);
 const recentFiles: RecentFileMenuItem[] = [];
+
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (!hasSingleInstanceLock) {
+  app.quit();
+}
+
+function getAppIconPath() {
+  return isDev ? path.join(__dirname, "../public/app-icon.ico") : path.join(__dirname, "../dist/app-icon.ico");
+}
 
 function createMainWindow() {
   isRendererReady = false;
+  const appIconPath = getAppIconPath();
 
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
     minWidth: 960,
     minHeight: 640,
     title: "Markdown Viewer v2",
+    icon: appIconPath,
     backgroundColor: "#F7F5F0",
     titleBarStyle: "default",
     webPreferences: {
@@ -57,7 +73,11 @@ function createMainWindow() {
     }
 
     event.preventDefault();
-    mainWindow.webContents.send("app:close-requested");
+    mainWindow?.webContents.send("app:close-requested");
+  });
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
   });
 
   if (isDev) {
@@ -65,6 +85,41 @@ function createMainWindow() {
   } else {
     void mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   }
+}
+
+function findMarkdownFileArgument(argv: string[]) {
+  return (
+    argv.find((argument) => {
+      if (argument.startsWith("--") || !isMarkdownFilePath(argument)) {
+        return false;
+      }
+
+      return existsSync(argument);
+    }) ?? null
+  );
+}
+
+function requestOpenMarkdownFile(filePath: string | null) {
+  if (!filePath || !isMarkdownFilePath(filePath) || !existsSync(filePath)) {
+    return;
+  }
+
+  if (isRendererReady && mainWindow) {
+    mainWindow.webContents.send("app:open-file-requested", filePath);
+    return;
+  }
+
+  pendingOpenFilePath = filePath;
+}
+
+function flushPendingOpenFile() {
+  if (!mainWindow || !pendingOpenFilePath) {
+    return;
+  }
+
+  const nextFilePath = pendingOpenFilePath;
+  pendingOpenFilePath = null;
+  mainWindow.webContents.send("app:open-file-requested", nextFilePath);
 }
 
 function setApplicationMenu() {
@@ -160,6 +215,7 @@ ipcMain.on("document:set-edited", (event, isEdited: boolean) => {
 
 ipcMain.on("app:renderer-ready", () => {
   isRendererReady = true;
+  flushPendingOpenFile();
 });
 
 ipcMain.on("app:close-response", (event, shouldClose: boolean) => {
@@ -177,16 +233,39 @@ ipcMain.on("app:close-response", (event, shouldClose: boolean) => {
   isForceClosing = false;
 });
 
-app.whenReady().then(() => {
-  setApplicationMenu();
-  createMainWindow();
+if (hasSingleInstanceLock) {
+  app.on("second-instance", (_event, argv) => {
+    const filePath = findMarkdownFileArgument(argv);
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+
+      mainWindow.focus();
+    } else {
       createMainWindow();
     }
+
+    requestOpenMarkdownFile(filePath);
   });
-});
+
+  app.on("open-file", (event, filePath) => {
+    event.preventDefault();
+    requestOpenMarkdownFile(filePath);
+  });
+
+  app.whenReady().then(() => {
+    setApplicationMenu();
+    createMainWindow();
+
+    app.on("activate", () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createMainWindow();
+      }
+    });
+  });
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

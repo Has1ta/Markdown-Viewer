@@ -58,6 +58,13 @@
     max-width: calc(100vw - 24px);
   }
 
+  .floating-back-to-top {
+    right: var(--space-3);
+    bottom: calc(var(--space-3) + 68px + var(--floating-back-to-top-lift, 0px));
+    width: 44px;
+    height: 44px;
+  }
+
   .document-header {
     margin-top: var(--space-4);
   }
@@ -149,5 +156,15 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .toast {
+    animation: none;
+  }
+
+  .floating-back-to-top,
+  .floating-back-to-top.is-visible,
+  .floating-back-to-top.is-visible:hover {
+    transform: none;
   }
 }

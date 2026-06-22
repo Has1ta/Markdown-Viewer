@@ -21,6 +21,7 @@ export function App() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastId, setToastId] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>(initialAppState.viewMode);
   const [unsavedDialog, setUnsavedDialog] = useState<{ actionLabel: string } | null>(null);
   const unsavedChoiceResolverRef = useRef<((choice: UnsavedChangesChoice) => void) | null>(null);
@@ -34,10 +35,6 @@ export function App() {
   const stats = useMemo(() => getMarkdownStats(markdown, headings.length), [headings.length, markdown]);
   const isDirty = markdown !== savedMarkdown;
   const lastSavedLabel = lastSavedAt ? `保存于 ${formatSavedTime(lastSavedAt)}` : initialAppState.lastSavedLabel;
-
-  useEffect(() => {
-    window.markdownViewer?.notifyReady();
-  }, []);
 
   useEffect(() => {
     isDirtyRef.current = isDirty;
@@ -81,12 +78,20 @@ export function App() {
     const removeCloseListener = window.markdownViewer?.onCloseRequested(() => {
       void handleCloseRequested();
     });
+    const removeOpenFileRequestListener = window.markdownViewer?.onOpenFileRequested((requestedFilePath) => {
+      void handleOpenFileByPath(requestedFilePath, "打开双击文件", "文件无法打开。");
+    });
 
     return () => {
       removeMenuListener?.();
       removeRecentFilesListener?.();
       removeCloseListener?.();
+      removeOpenFileRequestListener?.();
     };
+  }, []);
+
+  useEffect(() => {
+    window.markdownViewer?.notifyReady();
   }, []);
 
   useEffect(() => {
@@ -112,14 +117,18 @@ export function App() {
   }
 
   async function handleOpenRecentFile(recentFilePath: string) {
-    const canContinue = await confirmUnsavedChanges("打开最近文件");
+    await handleOpenFileByPath(recentFilePath, "打开最近文件", "最近文件无法打开，已从本次会话列表移除。");
+  }
+
+  async function handleOpenFileByPath(targetFilePath: string, actionLabel: string, fallbackError: string) {
+    const canContinue = await confirmUnsavedChanges(actionLabel);
     if (!canContinue) {
       return;
     }
 
-    const result = await window.markdownViewer?.openMarkdownFileByPath(recentFilePath);
+    const result = await window.markdownViewer?.openMarkdownFileByPath(targetFilePath);
     if (!result || result.canceled || result.content === null || result.fileName === null) {
-      showToast(result?.error ?? "最近文件无法打开，已从本次会话列表移除。");
+      showToast(result?.error ?? fallbackError);
       return;
     }
 
@@ -262,6 +271,7 @@ export function App() {
 
   function showToast(message: string) {
     setToastMessage(message);
+    setToastId((currentId) => currentId + 1);
 
     if (toastTimerRef.current !== null) {
       window.clearTimeout(toastTimerRef.current);
@@ -287,6 +297,7 @@ export function App() {
         recentFiles={recentFiles}
         stats={stats}
         toastMessage={toastMessage}
+        toastId={toastId}
         onChangeMarkdown={setMarkdown}
         onChangeViewMode={setViewMode}
         onOpenFile={() => void handleOpenFile()}
@@ -294,6 +305,7 @@ export function App() {
         onSaveFile={() => void handleSaveFile()}
         onSaveFileAs={() => void handleSaveFileAs()}
         onDropFiles={(files) => void handleDroppedFiles(files)}
+        onShowToast={showToast}
       />
       {unsavedDialog && (
         <UnsavedChangesDialog actionLabel={unsavedDialog.actionLabel} fileName={fileName} onChoose={resolveUnsavedChoice} />

@@ -11,13 +11,15 @@
     "test": "vitest run",
     "build": "tsc -b tsconfig.app.json tsconfig.electron.json && vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
-    "dist": "npm run build && electron-builder --win",
+    "dist": "npm run build && electron-builder --win && npm run release:helpers",
+    "release:helpers": "node scripts/write-release-uninstaller.cjs",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc -b tsconfig.app.json tsconfig.electron.json"
   },
   "build": {
     "appId": "com.has1ta.markdownviewer",
     "productName": "Markdown Viewer",
+    "icon": "public/app-icon.ico",
     "asar": true,
     "compression": "maximum",
     "afterPack": "scripts/after-pack.cjs",
@@ -43,12 +45,24 @@
             "x64"
           ]
         }
+      ],
+      "fileAssociations": [
+        {
+          "ext": [
+            "md",
+            "markdown",
+            "mdown",
+            "mkd"
+          ],
+          "name": "Markdown Document",
+          "description": "Markdown 文档"
+        }
       ]
     },
     "nsis": {
       "artifactName": "${productName} Setup ${version}.${ext}",
       "oneClick": false,
-      "perMachine": false,
+      "perMachine": true,
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": false
     },

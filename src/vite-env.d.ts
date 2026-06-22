@@ -46,5 +46,6 @@ interface Window {
     onRecentFilesUpdated: (callback: (recentFiles: RecentMarkdownFile[]) => void) => () => void;
     onMenuCommand: (callback: (command: MarkdownMenuCommand, payload?: unknown) => void) => () => void;
     onCloseRequested: (callback: () => void) => () => void;
+    onOpenFileRequested: (callback: (filePath: string) => void) => () => void;
   };
 }

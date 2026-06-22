@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState, type ComponentType, type DragEvent } from "react";
+import { Suspense, lazy, useEffect, useRef, useState, type ComponentType, type CSSProperties, type DragEvent } from "react";
 import { ArrowUp, FolderOpen, PanelLeft, Save, SaveAll, X } from "lucide-react";
 import type { DocumentStats, HeadingItem, RecentFile, ViewMode } from "../app/app-types";
 import { BottomBar } from "./BottomBar";
@@ -24,6 +24,7 @@ interface AppShellProps {
   recentFiles: RecentFile[];
   stats: DocumentStats;
   toastMessage: string | null;
+  toastId: number;
   onChangeMarkdown: (markdown: string) => void;
   onChangeViewMode: (viewMode: ViewMode) => void;
   onOpenFile: () => void;
@@ -31,6 +32,7 @@ interface AppShellProps {
   onSaveFile: () => void;
   onSaveFileAs: () => void;
   onDropFiles: (files: File[]) => void;
+  onShowToast: (message: string) => void;
 }
 
 export function AppShell({
@@ -45,18 +47,23 @@ export function AppShell({
   recentFiles,
   stats,
   toastMessage,
+  toastId,
   onChangeMarkdown,
   onChangeViewMode,
   onOpenFile,
   onOpenRecentFile,
   onSaveFile,
   onSaveFileAs,
-  onDropFiles
+  onDropFiles,
+  onShowToast
 }: AppShellProps) {
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
   const [pendingHeadingId, setPendingHeadingId] = useState<string | null>(null);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
+  const [isBackToTopVisible, setIsBackToTopVisible] = useState(false);
+  const [backToTopLift, setBackToTopLift] = useState(0);
   const [dragDepth, setDragDepth] = useState(0);
+  const bottomBarRef = useRef<HTMLElement | null>(null);
   const navigationInProgressRef = useRef(false);
   const isDraggingFile = dragDepth > 0;
 
@@ -129,6 +136,49 @@ export function AppShell({
   }, [headings, viewMode]);
 
   useEffect(() => {
+    let frameId: number | null = null;
+
+    function updateBackToTopState() {
+      frameId = null;
+      setIsBackToTopVisible(window.scrollY > 180);
+
+      const bottomBarElement = bottomBarRef.current;
+      if (!bottomBarElement) {
+        setBackToTopLift(0);
+        return;
+      }
+
+      const bottomBarRect = bottomBarElement.getBoundingClientRect();
+      const isCompactViewport = window.matchMedia("(max-width: 767px)").matches;
+      const restingBottomOffset = isCompactViewport ? 80 : 96;
+      const clearance = 16;
+      const nextLift = Math.max(0, Math.ceil(window.innerHeight - restingBottomOffset - bottomBarRect.top + clearance));
+      setBackToTopLift(nextLift);
+    }
+
+    function scheduleBackToTopStateUpdate() {
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(updateBackToTopState);
+    }
+
+    scheduleBackToTopStateUpdate();
+    window.addEventListener("scroll", scheduleBackToTopStateUpdate, { passive: true });
+    window.addEventListener("resize", scheduleBackToTopStateUpdate);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      window.removeEventListener("scroll", scheduleBackToTopStateUpdate);
+      window.removeEventListener("resize", scheduleBackToTopStateUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
     if (viewMode !== "render" || pendingHeadingId === null) {
       return;
     }
@@ -170,6 +220,11 @@ export function AppShell({
     }
 
     scrollToHeading(headingId);
+  }
+
+  function scrollToTop() {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
   }
 
   function handleDragEnter(event: DragEvent<HTMLDivElement>) {
@@ -267,7 +322,9 @@ export function AppShell({
         </div>
 
         <section className="editor-surface" id="document-editor-surface" aria-label="文档内容">
-          {viewMode === "render" && <RenderEditor markdown={markdown} filePath={filePath} onChangeMarkdown={onChangeMarkdown} />}
+          {viewMode === "render" && (
+            <RenderEditor markdown={markdown} filePath={filePath} onChangeMarkdown={onChangeMarkdown} onShowToast={onShowToast} />
+          )}
           {viewMode === "source" && (
             <Suspense fallback={<EmptyState title="正在准备源码视图" description="编辑器资源加载完成后即可继续精修 Markdown。" />}>
               <SourceEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />
@@ -281,8 +338,9 @@ export function AppShell({
         </section>
 
         <BottomBar
+          ref={bottomBarRef}
           actions={[
-            { label: "返回顶部", icon: ArrowUp, onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
+            { label: "返回顶部", icon: ArrowUp, onClick: scrollToTop },
             { label: "打开", icon: FolderOpen, onClick: onOpenFile },
             { label: "另存为", icon: SaveAll, onClick: onSaveFileAs },
             { label: "保存", icon: Save, primary: true, onClick: onSaveFile }
@@ -310,8 +368,20 @@ export function AppShell({
           </div>
         </div>
       )}
+      <button
+        className={isBackToTopVisible ? "floating-back-to-top is-visible" : "floating-back-to-top"}
+        type="button"
+        aria-hidden={!isBackToTopVisible}
+        aria-label="返回顶部"
+        title="返回顶部"
+        tabIndex={isBackToTopVisible ? 0 : -1}
+        style={{ "--floating-back-to-top-lift": `${backToTopLift}px` } as CSSProperties}
+        onClick={scrollToTop}
+      >
+        <ArrowUp size={20} />
+      </button>
       {isDraggingFile && <DropOverlay message="释放以打开 Markdown 文件" />}
-      {toastMessage && <Toast message={toastMessage} />}
+      {toastMessage && <Toast key={toastId} message={toastMessage} />}
     </div>
   );
 }

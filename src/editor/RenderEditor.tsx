@@ -11,6 +11,7 @@ interface RenderEditorProps {
   filePath?: string | null;
   isLoading?: boolean;
   onChangeMarkdown?: (markdown: string) => void;
+  onShowToast?: (message: string) => void;
 }
 
 const supportedLanguages = [
@@ -26,7 +27,7 @@ const supportedLanguages = [
   { label: "SQL", value: "sql" }
 ];
 
-export function RenderEditor({ markdown, filePath = null, isLoading = false, onChangeMarkdown }: RenderEditorProps) {
+export function RenderEditor({ markdown, filePath = null, isLoading = false, onChangeMarkdown, onShowToast }: RenderEditorProps) {
   const [assetUrlMap, setAssetUrlMap] = useState<Record<string, string | null>>({});
   const [codeStatusMessage, setCodeStatusMessage] = useState("");
 
@@ -159,12 +160,18 @@ export function RenderEditor({ markdown, filePath = null, isLoading = false, onC
       return;
     }
 
-    await navigator.clipboard.writeText(code);
-    copyButton.textContent = "已复制";
-    setCodeStatusMessage("代码已复制。");
-    window.setTimeout(() => {
-      copyButton.textContent = "复制";
-    }, 1400);
+    try {
+      await navigator.clipboard.writeText(code);
+      copyButton.textContent = "已复制";
+      setCodeStatusMessage("代码已复制。");
+      onShowToast?.("已复制代码");
+      window.setTimeout(() => {
+        copyButton.textContent = "复制";
+      }, 1400);
+    } catch {
+      setCodeStatusMessage("复制失败，请重试。");
+      onShowToast?.("复制失败，请重试。");
+    }
   }
 
   function toggleCodePreview(previewButton: HTMLButtonElement) {

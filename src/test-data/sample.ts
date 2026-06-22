@@ -1,3 +1,5 @@
+import sampleDocumentPreviewUrl from "../assets/sample-document-preview.svg";
+
 export const sampleMarkdown = `# Markdown Viewer v2 示例文档
 
 这是一份用于静态渲染阅读阶段的内置文档。它会覆盖标题、段落、链接、图片、列表、任务列表、引用、表格、行内代码、代码块和分割线，方便检查阅读视图是否稳定。
@@ -14,7 +16,7 @@ Markdown Viewer v2 的默认模式是渲染视图。侧栏、工具条和状态�
 
 正文里可以出现 \`inline code\`、**适度强调** 和 _轻微语气变化_。这些元素需要和暖白纸面风格融合，而不是像默认浏览器样式一样突兀。
 
-![Markdown Viewer 阅读界面示意](/sample-document-preview.svg "阅读界面示意")
+![Markdown Viewer 阅读界面示意](${sampleDocumentPreviewUrl} "阅读界面示意")
 
 ## 编辑入口
 

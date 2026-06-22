@@ -40,5 +40,11 @@ contextBridge.exposeInMainWorld("markdownViewer", {
     ipcRenderer.on("app:close-requested", listener);
 
     return () => ipcRenderer.removeListener("app:close-requested", listener);
+  },
+  onOpenFileRequested: (callback: (filePath: string) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, filePath: string) => callback(filePath);
+    ipcRenderer.on("app:open-file-requested", listener);
+
+    return () => ipcRenderer.removeListener("app:open-file-requested", listener);
   }
 });

@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import { forwardRef, type ComponentType } from "react";
 
 interface BottomBarAction {
   label: string;
@@ -11,9 +11,9 @@ interface BottomBarProps {
   actions: BottomBarAction[];
 }
 
-export function BottomBar({ actions }: BottomBarProps) {
+export const BottomBar = forwardRef<HTMLElement, BottomBarProps>(function BottomBar({ actions }, ref) {
   return (
-    <footer className="bottom-bar" aria-label="文档操作">
+    <footer ref={ref} className="bottom-bar" aria-label="文档操作">
       {actions.map((action) => {
         const Icon = action.icon;
 
@@ -31,4 +31,4 @@ export function BottomBar({ actions }: BottomBarProps) {
       })}
     </footer>
   );
-}
+});
