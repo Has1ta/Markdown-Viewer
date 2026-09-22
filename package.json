@@ -1,6 +1,6 @@
 {
   "name": "markdown-viewer-v2-reset",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Markdown Viewer v2 重置版桌面应用骨架",
   "author": "Has1ta",
   "main": "dist-electron/main.js",

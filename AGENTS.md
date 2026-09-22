@@ -62,7 +62,7 @@
 - 如果项目从文档阶段进入可运行应用阶段，应建立明确的提交节奏，例如需求整理、UI 原型、核心功能、打包发布分别提交。
 - 进入源码阶段后，应以 `软件制作方案.md` 的阶段划分为主线推进，阶段完成后更新验收状态。
 - 当前源码阶段使用 `npm run dev` 启动 Electron 开发窗口，使用 `npm run lint` 检查代码，使用 `npm test` 运行工具函数测试，使用 `npm run build` 验证 TypeScript 与 Vite 生产构建，使用 `npm run dist` 生成 Windows 安装包和便携版。
-- 代码修改完成后的标准收尾顺序建议为：先运行必要的 lint/test/build 或界面验证，再运行 `npm run dist`，最后确认 `release/Markdown Viewer Portable 0.1.0.exe` 和安装包的修改时间已经更新。
+- 代码修改完成后的标准收尾顺序建议为：先运行必要的 lint/test/build 或界面验证，再运行 `npm run dist`，最后确认 `release/Markdown Viewer Portable 0.1.1.exe` 和安装包的修改时间已经更新。
 - `dist/`、`dist-electron/`、`node_modules/` 和打包产物不应提交到 Git。
 - `release/uninstall.cmd` 与 `release/uninstall.ps1` 由 `scripts/write-release-uninstaller.cjs` 自动生成，用于查找 Windows 已安装版本的官方卸载命令；便携版移除方式仍是删除便携 exe。
 - 安装版通过 electron-builder `fileAssociations` 注册 `.md`、`.markdown`、`.mdown`、`.mkd` 文件关联，并使用 NSIS `perMachine: true` 保证 Windows 文件关联生效；便携版不自动注册文件关联。
@@ -75,6 +75,7 @@
 - 做目录点击定位相关修改时，应避免直接依赖 `scrollIntoView({ block: "start" })`；优先用固定阅读偏移计算 `window.scrollTo`，并让长距离跳转直接定位、短距离跳转平滑滚动。
 - 做目录高亮相关修改时，应保留 `navigationInProgressRef` 之类的显式导航保护，避免平滑滚动过程中被普通 scroll 监听提前抢占高亮。
 - 做源码编辑器相关修改时，应保持 `markdown` 字符串作为单一真相源；CodeMirror 只负责编辑表面，外部内容变化必须同步进编辑器但不能造成重复回写循环。
+- 源码编辑器的文本选区须在焦点与失焦状态下都保持清晰可辨；选区样式应覆盖 CodeMirror 的选择图层，不能只依赖浏览器原生高亮，也不能被当前行等整行背景遮住。
 - CodeMirror 依赖应保持懒加载和独立 chunk，避免默认渲染视图首包明显变大。
 - 做双栏编辑相关修改时，应继续保持 `markdown` 作为单一真相源；源码侧和渲染编辑侧只能通过来源与版本快照协调，不能让两个编辑器各自持有独立文档真相。
 - 渲染编辑侧当前使用 Crepe/Milkdown；外部写入应通过编辑器 API 同步并用 `isApplyingExternalRef` 抑制回写，避免右侧接收源码变化时再次触发父级更新。

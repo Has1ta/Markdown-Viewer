@@ -32,14 +32,18 @@ export const sourceEditorTheme = EditorView.theme({
     padding: "0 12px 0 10px"
   },
   ".cm-activeLine": {
-    backgroundColor: "var(--bg-subtle)"
+    backgroundColor: "transparent",
+    boxShadow: "inset 3px 0 0 var(--accent-soft)"
   },
   ".cm-activeLineGutter": {
     backgroundColor: "var(--accent-soft)",
     color: "var(--accent-primary)"
   },
-  ".cm-selectionBackground": {
-    backgroundColor: "color-mix(in srgb, var(--accent-primary) 24%, transparent) !important"
+  ".cm-selectionLayer .cm-selectionBackground": {
+    backgroundColor: "var(--editor-selection-inactive) !important"
+  },
+  "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+    backgroundColor: "var(--editor-selection) !important"
   },
   ".cm-cursor": {
     borderLeftColor: "var(--accent-primary)"
