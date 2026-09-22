@@ -1,6 +1,6 @@
-# Markdown Viewer v2 重置
+# Markdown Viewer
 
-本仓库用于管理 Markdown Viewer v2 重置过程中的产品说明、界面风格规范和后续开发资料。
+本仓库用于管理 Markdown Viewer过程中的产品说明、界面风格规范和后续开发资料。
 
 ## 当前内容
 
