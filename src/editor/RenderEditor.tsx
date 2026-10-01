@@ -6,6 +6,7 @@ import type { RendererThis, Tokens } from "marked";
 import "katex/dist/katex.min.css";
 import { EmptyState } from "../components/EmptyState";
 import { cleanHeadingText } from "../markdown/heading-text";
+import { markedBracketMath } from "../markdown/math-extension";
 import { slugifyHeading } from "../markdown/slug";
 
 interface RenderEditorProps {
@@ -327,7 +328,7 @@ function renderMarkdown(markdown: string, assetUrlMap: Record<string, string | n
     }
   });
 
-  parser.use(markedKatex({ throwOnError: false }));
+  parser.use(markedKatex({ throwOnError: false }), markedBracketMath());
 
   return parser.parse(markdown, { async: false }) as string;
 }
