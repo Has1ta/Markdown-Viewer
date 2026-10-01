@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type MouseEvent, type FormEvent } from "react";
 import DOMPurify from "dompurify";
 import { Marked } from "marked";
+import markedKatex from "marked-katex-extension";
 import type { RendererThis, Tokens } from "marked";
+import "katex/dist/katex.min.css";
 import { EmptyState } from "../components/EmptyState";
 import { cleanHeadingText } from "../markdown/heading-text";
 import { slugifyHeading } from "../markdown/slug";
@@ -324,6 +326,8 @@ function renderMarkdown(markdown: string, assetUrlMap: Record<string, string | n
       }
     }
   });
+
+  parser.use(markedKatex({ throwOnError: false }));
 
   return parser.parse(markdown, { async: false }) as string;
 }

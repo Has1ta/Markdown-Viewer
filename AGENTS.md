@@ -81,6 +81,7 @@
 - 渲染编辑侧当前使用 Crepe/Milkdown；外部写入应通过编辑器 API 同步并用 `isApplyingExternalRef` 抑制回写，避免右侧接收源码变化时再次触发父级更新。
 - CodeMirror 的 `updateListener` 不应逐事务同步调用父级 `setMarkdown`；源码侧输入应按 animation frame 合并为最新 Markdown 再上抛，避免快速输入造成 React 嵌套更新。
 - Crepe 相关资源目前只在双栏视图懒加载；后续若调整功能插件或打包分块，应同时检查 `npm run build` 的 chunk 体积和默认渲染视图首屏资源。
+- 主阅读视图使用 `marked`，数学公式需通过 `marked-katex-extension` 与本地 `katex/dist/katex.min.css` 显式启用；双栏 Crepe 渲染编辑视图需同时启用 `latex` feature 和对应主题样式。验证行内 `$...$`、块级 `$$...$$`，并确认打包资源离线可用。
 - 渲染编辑侧应优先使用 `CrepeBuilder` 加按需 feature 导入，不要轻易改回 `@milkdown/crepe` 根入口；样式也应按当前启用功能导入，避免把已关闭的 AI、Latex、内置 CodeMirror 和 KaTeX 资源重新打进产物。
 - 做代码块工具条相关修改时，应保持 `RenderEditor` 事件代理方式，语言选择需要写回 fenced code block 的 info string，复制结果用按钮状态、Toast 和 aria-live 通知反馈。
 - 做本地图片路径相关修改时，不能在渲染层直接拼接 Windows 本地路径；应通过 preload 白名单 API 让主进程校验 Markdown 文件目录、图片扩展名和 `file://` URL。

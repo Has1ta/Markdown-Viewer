@@ -5,6 +5,7 @@ import { cursor } from "@milkdown/crepe/feature/cursor";
 import { imageBlock } from "@milkdown/crepe/feature/image-block";
 import { linkTooltip } from "@milkdown/crepe/feature/link-tooltip";
 import { listItem } from "@milkdown/crepe/feature/list-item";
+import { latex } from "@milkdown/crepe/feature/latex";
 import { placeholder } from "@milkdown/crepe/feature/placeholder";
 import { table } from "@milkdown/crepe/feature/table";
 import { toolbar } from "@milkdown/crepe/feature/toolbar";
@@ -13,6 +14,7 @@ import "@milkdown/crepe/theme/common/prosemirror.css";
 import "@milkdown/crepe/theme/common/reset.css";
 import "@milkdown/crepe/theme/common/cursor.css";
 import "@milkdown/crepe/theme/common/list-item.css";
+import "@milkdown/crepe/theme/common/latex.css";
 import "@milkdown/crepe/theme/common/link-tooltip.css";
 import "@milkdown/crepe/theme/common/image-block.css";
 import "@milkdown/crepe/theme/common/block-edit.css";
@@ -106,6 +108,7 @@ function createCrepe(root: HTMLElement, defaultValue: string, onMarkdownUpdated:
   })
     .addFeature(cursor)
     .addFeature(listItem)
+    .addFeature(latex)
     .addFeature(linkTooltip)
     .addFeature(imageBlock)
     .addFeature(blockEdit)
