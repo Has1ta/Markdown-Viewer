@@ -58,14 +58,24 @@ export function AppShell({
   onShowToast
 }: AppShellProps) {
   const [activeHeadingId, setActiveHeadingId] = useState(headings[0]?.id ?? "");
-  const [pendingHeadingId, setPendingHeadingId] = useState<string | null>(null);
+  const [sourceNavigationTarget, setSourceNavigationTarget] = useState<{
+    headingId: string;
+    requestId: number;
+    viewMode: ViewMode;
+    filePath: string | null;
+  } | null>(null);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
   const [isBackToTopVisible, setIsBackToTopVisible] = useState(false);
   const [backToTopLift, setBackToTopLift] = useState(0);
   const [dragDepth, setDragDepth] = useState(0);
   const bottomBarRef = useRef<HTMLElement | null>(null);
   const navigationInProgressRef = useRef(false);
+  const navigationReleaseTimerRef = useRef<number | null>(null);
+  const sourceNavigationRequestRef = useRef(0);
   const isDraggingFile = dragDepth > 0;
+  const currentSourceNavigationTarget = sourceNavigationTarget?.viewMode === viewMode && sourceNavigationTarget.filePath === filePath
+    ? sourceNavigationTarget
+    : null;
 
   useEffect(() => {
     setActiveHeadingId((currentId) => {
@@ -179,17 +189,19 @@ export function AppShell({
   }, []);
 
   useEffect(() => {
-    if (viewMode !== "render" || pendingHeadingId === null) {
-      return;
+    setSourceNavigationTarget(null);
+    navigationInProgressRef.current = false;
+    if (navigationReleaseTimerRef.current !== null) {
+      window.clearTimeout(navigationReleaseTimerRef.current);
+      navigationReleaseTimerRef.current = null;
     }
+  }, [filePath, viewMode]);
 
-    const frameId = window.requestAnimationFrame(() => {
-      scrollToHeading(pendingHeadingId);
-      setPendingHeadingId(null);
-    });
-
-    return () => window.cancelAnimationFrame(frameId);
-  }, [pendingHeadingId, viewMode]);
+  useEffect(() => () => {
+    if (navigationReleaseTimerRef.current !== null) {
+      window.clearTimeout(navigationReleaseTimerRef.current);
+    }
+  }, []);
 
   function scrollToHeading(headingId: string) {
     const headingElement = document.getElementById(headingId);
@@ -205,8 +217,12 @@ export function AppShell({
     const shouldSmoothScroll = !prefersReducedMotion && Math.abs(nextScrollTop - window.scrollY) < 900;
     window.scrollTo({ top: nextScrollTop, behavior: shouldSmoothScroll ? "smooth" : "auto" });
     setActiveHeadingId(headingId);
-    window.setTimeout(() => {
+    if (navigationReleaseTimerRef.current !== null) {
+      window.clearTimeout(navigationReleaseTimerRef.current);
+    }
+    navigationReleaseTimerRef.current = window.setTimeout(() => {
       navigationInProgressRef.current = false;
+      navigationReleaseTimerRef.current = null;
     }, shouldSmoothScroll ? 900 : 120);
   }
 
@@ -214,12 +230,17 @@ export function AppShell({
     setIsMobileTocOpen(false);
 
     if (viewMode !== "render") {
-      setPendingHeadingId(headingId);
-      onChangeViewMode("render");
+      setActiveHeadingId(headingId);
+      sourceNavigationRequestRef.current += 1;
+      setSourceNavigationTarget({ headingId, requestId: sourceNavigationRequestRef.current, viewMode, filePath });
       return;
     }
 
     scrollToHeading(headingId);
+  }
+
+  function handleSourceActiveHeadingChange(headingId: string) {
+    setActiveHeadingId((currentId) => currentId === headingId ? currentId : headingId);
   }
 
   function scrollToTop() {
@@ -327,12 +348,24 @@ export function AppShell({
           )}
           {viewMode === "source" && (
             <Suspense fallback={<EmptyState title="正在准备源码视图" description="编辑器资源加载完成后即可继续精修 Markdown。" />}>
-              <SourceEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />
+              <SourceEditor
+                markdown={markdown}
+                onChangeMarkdown={onChangeMarkdown}
+                headings={headings}
+                navigationTarget={currentSourceNavigationTarget}
+                onActiveHeadingChange={handleSourceActiveHeadingChange}
+              />
             </Suspense>
           )}
           {viewMode === "split" && (
             <Suspense fallback={<EmptyState title="正在准备双栏视图" description="源码编辑器加载完成后会显示源码与渲染对照。" />}>
-              <SplitEditor markdown={markdown} onChangeMarkdown={onChangeMarkdown} />
+              <SplitEditor
+                markdown={markdown}
+                onChangeMarkdown={onChangeMarkdown}
+                headings={headings}
+                navigationTarget={currentSourceNavigationTarget}
+                onActiveHeadingChange={handleSourceActiveHeadingChange}
+              />
             </Suspense>
           )}
         </section>

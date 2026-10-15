@@ -5,6 +5,7 @@ export interface HeadingItem {
   level: number;
   text: string;
   index: number;
+  lineNumber: number;
 }
 
 export interface DocumentStats {

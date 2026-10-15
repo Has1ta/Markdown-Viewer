@@ -2,13 +2,17 @@ import { useEffect, useRef } from "react";
 import { RenderEditEditor } from "./RenderEditEditor";
 import { SourceEditor } from "./SourceEditor";
 import { createInitialSyncSnapshot, createNextSyncSnapshot, type EditorUpdateSource } from "./editor-sync";
+import type { HeadingItem } from "../app/app-types";
 
 interface SplitEditorProps {
   markdown: string;
   onChangeMarkdown: (markdown: string) => void;
+  headings?: HeadingItem[];
+  navigationTarget?: { headingId: string; requestId: number } | null;
+  onActiveHeadingChange?: (headingId: string) => void;
 }
 
-export function SplitEditor({ markdown, onChangeMarkdown }: SplitEditorProps) {
+export function SplitEditor({ markdown, onChangeMarkdown, headings, navigationTarget, onActiveHeadingChange }: SplitEditorProps) {
   const syncSnapshotRef = useRef(createInitialSyncSnapshot(markdown));
 
   useEffect(() => {
@@ -35,6 +39,9 @@ export function SplitEditor({ markdown, onChangeMarkdown }: SplitEditorProps) {
         <SourceEditor
           markdown={markdown}
           onChangeMarkdown={(nextMarkdown) => handleChangeMarkdown(nextMarkdown, "source")}
+          headings={headings}
+          navigationTarget={navigationTarget}
+          onActiveHeadingChange={onActiveHeadingChange}
         />
       </div>
       <div className="split-pane">

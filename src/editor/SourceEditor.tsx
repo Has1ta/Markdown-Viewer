@@ -13,22 +13,48 @@ import {
   lineNumbers
 } from "@codemirror/view";
 import { sourceEditorTheme, sourceHighlightStyle } from "./source-editor-theme";
+import type { HeadingItem } from "../app/app-types";
+import { findHeadingAtSourceLine, sourceReadingPosition } from "./source-navigation";
 
 interface SourceEditorProps {
   markdown: string;
   onChangeMarkdown: (markdown: string) => void;
+  headings?: HeadingItem[];
+  navigationTarget?: { headingId: string; requestId: number } | null;
+  onActiveHeadingChange?: (headingId: string) => void;
 }
 
-export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) {
+export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationTarget, onActiveHeadingChange }: SourceEditorProps) {
   const editorHostRef = useRef<HTMLDivElement | null>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChangeMarkdown);
   const pendingMarkdownRef = useRef<string | null>(null);
   const changeFrameRef = useRef<number | null>(null);
+  const headingsRef = useRef(headings ?? []);
+  const onActiveHeadingChangeRef = useRef(onActiveHeadingChange);
+  const activeHeadingRef = useRef("");
+  const activeFrameRef = useRef<number | null>(null);
+  const navigationFrameRef = useRef<number | null>(null);
+  const navigationLockRef = useRef<{
+    headingId: string;
+    isAligning: boolean;
+    windowTop: number;
+    innerTop: number;
+  } | null>(null);
+  const navigationVersionRef = useRef(0);
 
   useEffect(() => {
     onChangeRef.current = onChangeMarkdown;
   }, [onChangeMarkdown]);
+
+  useEffect(() => {
+    headingsRef.current = headings ?? [];
+    onActiveHeadingChangeRef.current = onActiveHeadingChange;
+    if (navigationLockRef.current && !headingsRef.current.some(({ id }) => id === navigationLockRef.current?.headingId)) {
+      navigationLockRef.current = null;
+    }
+    scheduleActiveHeadingUpdate();
+  }, [headings, onActiveHeadingChange]);
 
   useEffect(() => {
     if (!editorHostRef.current) {
@@ -60,15 +86,58 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
             if (update.docChanged && !isExternalUpdate) {
               scheduleMarkdownChange(update.state.doc.toString());
             }
+
+            if (update.docChanged) {
+              releaseNavigation();
+            }
+            if (update.docChanged || update.viewportChanged || update.geometryChanged) {
+              scheduleActiveHeadingUpdate();
+            }
           })
         ]
       })
     });
 
     editorViewRef.current = editorView;
+    scheduleActiveHeadingUpdate();
+    const onScrollKey = (event: KeyboardEvent) => {
+      if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
+        releaseNavigation();
+      }
+    };
+    const onScroll = () => {
+      const navigation = navigationLockRef.current;
+      if (navigation && !navigation.isAligning && (
+        Math.abs(window.scrollY - navigation.windowTop) > 2 ||
+        Math.abs(editorView.scrollDOM.scrollTop - navigation.innerTop) > 2
+      )) {
+        releaseNavigation();
+      } else {
+        scheduleActiveHeadingUpdate();
+      }
+    };
+    editorView.scrollDOM.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", releaseNavigation);
+    window.addEventListener("wheel", releaseNavigation, { passive: true });
+    window.addEventListener("touchmove", releaseNavigation, { passive: true });
+    window.addEventListener("pointerdown", releaseNavigation);
+    window.addEventListener("keydown", onScrollKey);
 
     return () => {
       cancelPendingMarkdownChange();
+      navigationVersionRef.current += 1;
+      if (activeFrameRef.current !== null) window.cancelAnimationFrame(activeFrameRef.current);
+      if (navigationFrameRef.current !== null) window.cancelAnimationFrame(navigationFrameRef.current);
+      activeFrameRef.current = null;
+      navigationFrameRef.current = null;
+      editorView.scrollDOM.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", releaseNavigation);
+      window.removeEventListener("wheel", releaseNavigation);
+      window.removeEventListener("touchmove", releaseNavigation);
+      window.removeEventListener("pointerdown", releaseNavigation);
+      window.removeEventListener("keydown", onScrollKey);
       editorView.destroy();
       editorViewRef.current = null;
     };
@@ -91,6 +160,107 @@ export function SourceEditor({ markdown, onChangeMarkdown }: SourceEditorProps) 
       annotations: Transaction.remote.of(true)
     });
   }, [markdown]);
+
+  useEffect(() => {
+    const editorView = editorViewRef.current;
+    const heading = headingsRef.current.find(({ id }) => id === navigationTarget?.headingId);
+    if (!editorView || !heading || !navigationTarget) return;
+
+    navigationLockRef.current = { headingId: heading.id, isAligning: true, windowTop: 0, innerTop: 0 };
+    const navigationVersion = ++navigationVersionRef.current;
+    const navigatingView = editorView;
+    const targetLineNumber = heading.lineNumber;
+    reportActiveHeading(heading.id);
+    // Distant wrapped lines initially have estimated heights. Re-measure after
+    // CodeMirror renders the destination; scroll only the intended containers.
+    function alignHeading(attempt = 0) {
+      if (editorViewRef.current !== navigatingView || navigationVersionRef.current !== navigationVersion) return;
+      navigatingView.requestMeasure({
+        key: navigationVersionRef,
+        read(view) {
+          const sourceLine = view.state.doc.line(Math.min(targetLineNumber, view.state.doc.lines));
+          const lineTop = view.documentTop + view.lineBlockAt(sourceLine.from).top;
+          const scroller = view.scrollDOM;
+          const scrollerRect = scroller.getBoundingClientRect();
+          const activationOffset = Math.min(128, window.innerHeight * 0.24);
+          const scrollsInternally = scroller.scrollHeight > scroller.clientHeight + 1;
+          const innerOffset = Math.min(28, scroller.clientHeight * 0.1);
+          const desiredInnerTop = scrollerRect.top + innerOffset;
+          const innerTop = scrollsInternally
+            ? Math.max(0, Math.min(scroller.scrollHeight - scroller.clientHeight, scroller.scrollTop + (lineTop - desiredInnerTop) / view.scaleY))
+            : scroller.scrollTop;
+          const adjustedLineTop = lineTop - (innerTop - scroller.scrollTop) * view.scaleY;
+          const shouldScrollWindow = !scrollsInternally || desiredInnerTop < activationOffset || desiredInnerTop > window.innerHeight - 60;
+          const maxWindowTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          const windowTop = shouldScrollWindow
+            ? Math.max(0, Math.min(maxWindowTop, window.scrollY + adjustedLineTop - activationOffset))
+            : window.scrollY;
+          return { innerTop, windowTop, windowLeft: window.scrollX,
+            moved: Math.abs(innerTop - scroller.scrollTop) > 1 || Math.abs(windowTop - window.scrollY) > 1 };
+        },
+        write(measure, view) {
+          if (editorViewRef.current !== view || navigationVersionRef.current !== navigationVersion) return;
+          view.scrollDOM.scrollTo({ top: measure.innerTop, behavior: "instant" });
+          window.scrollTo({ top: measure.windowTop, left: measure.windowLeft, behavior: "instant" });
+          if (attempt < 7 && (measure.moved || attempt < 2)) {
+            navigationFrameRef.current = window.requestAnimationFrame(() => {
+              navigationFrameRef.current = null;
+              alignHeading(attempt + 1);
+            });
+          } else if (navigationLockRef.current) {
+            navigationLockRef.current = {
+              headingId: navigationLockRef.current.headingId,
+              isAligning: false,
+              windowTop: measure.windowTop,
+              innerTop: measure.innerTop
+            };
+          }
+        }
+      });
+    }
+    alignHeading();
+
+    return () => {
+      navigationVersionRef.current += 1;
+      if (navigationFrameRef.current !== null) window.cancelAnimationFrame(navigationFrameRef.current);
+      navigationFrameRef.current = null;
+    };
+  }, [navigationTarget]);
+
+  function reportActiveHeading(headingId: string) {
+    if (activeHeadingRef.current === headingId) return;
+    activeHeadingRef.current = headingId;
+    onActiveHeadingChangeRef.current?.(headingId);
+  }
+
+  function releaseNavigation() {
+    navigationLockRef.current = null;
+    navigationVersionRef.current += 1;
+    if (navigationFrameRef.current !== null) window.cancelAnimationFrame(navigationFrameRef.current);
+    navigationFrameRef.current = null;
+    scheduleActiveHeadingUpdate();
+  }
+
+  function scheduleActiveHeadingUpdate() {
+    if (activeFrameRef.current !== null) return;
+    activeFrameRef.current = window.requestAnimationFrame(() => {
+      activeFrameRef.current = null;
+      const editorView = editorViewRef.current;
+      if (!editorView) return;
+      editorView.requestMeasure({
+        key: activeFrameRef,
+        read(view) {
+          const bounds = view.scrollDOM.getBoundingClientRect();
+          const readingY = sourceReadingPosition(window.innerHeight, bounds.top, bounds.bottom);
+          const block = view.lineBlockAtHeight(Math.max(0, readingY - view.documentTop));
+          return findHeadingAtSourceLine(headingsRef.current, view.state.doc.lineAt(block.from).number)?.id ?? "";
+        },
+        write(headingId, view) {
+          if (editorViewRef.current === view) reportActiveHeading(navigationLockRef.current?.headingId ?? headingId);
+        }
+      });
+    });
+  }
 
   function scheduleMarkdownChange(nextMarkdown: string) {
     pendingMarkdownRef.current = nextMarkdown;

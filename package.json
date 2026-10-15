@@ -1,6 +1,6 @@
 {
   "name": "markdown-viewer-v2-reset",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Markdown Viewer v2 重置版桌面应用骨架",
   "author": "Has1ta",
   "main": "dist-electron/main.js",
@@ -10,6 +10,7 @@
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:split": "node scripts/verify-split-editor.cjs",
+    "test:toc": "node scripts/verify-source-navigation.cjs",
     "build": "tsc -b tsconfig.app.json tsconfig.electron.json && vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "dist": "npm run build && electron-builder --win && npm run release:helpers",

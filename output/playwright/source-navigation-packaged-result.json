@@ -1,0 +1,25 @@
+{
+  "version": "0.1.5",
+  "opened": true,
+  "navigated": {
+    "selected": "源码",
+    "active": "第30节",
+    "targetTop": 131.23959350585938,
+    "scrollY": 29052.666015625,
+    "sourceUnchanged": true
+  },
+  "scrolled": {
+    "selected": "源码",
+    "active": "第31节",
+    "scrollY": 30842,
+    "sourceUnchanged": true
+  },
+  "repeated": {
+    "selected": "源码",
+    "active": "第30节",
+    "targetTop": 131.23959350585938,
+    "scrollY": 29052.666015625,
+    "sourceUnchanged": true
+  },
+  "errors": []
+}

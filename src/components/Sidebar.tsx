@@ -48,7 +48,7 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
     const listElement = listRef.current;
     const activeItem = listElement?.querySelector<HTMLElement>(".toc-item.is-active");
 
-    if (!listElement || !activeItem) {
+    if (!listElement || !activeItem || activeItem.getClientRects().length === 0) {
       return;
     }
 
@@ -71,7 +71,7 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
         behavior: prefersReducedMotion ? "auto" : "smooth"
       });
     }
-  }, [activeHeadingId]);
+  }, [activeHeadingId, tocItems]);
 
   function toggleCollapsed(headingId: string) {
     setCollapsedIds((currentIds) => {
@@ -176,14 +176,14 @@ function getHeadingAncestorIds(headings: HeadingItem[], activeHeadingId: string)
 
   const activeHeading = headings[activeIndex];
   const ancestorIds: string[] = [];
-  let nextParentLevel = activeHeading.level - 1;
+  let childLevel = activeHeading.level;
 
-  for (let index = activeIndex - 1; index >= 0 && nextParentLevel >= 1; index -= 1) {
+  for (let index = activeIndex - 1; index >= 0 && childLevel > 1; index -= 1) {
     const candidate = headings[index];
 
-    if (candidate.level === nextParentLevel) {
+    if (candidate.level < childLevel) {
       ancestorIds.push(candidate.id);
-      nextParentLevel -= 1;
+      childLevel = candidate.level;
     }
   }
 

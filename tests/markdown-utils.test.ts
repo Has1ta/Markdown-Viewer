@@ -27,9 +27,22 @@ describe("Markdown 工具函数", () => {
 `);
 
     expect(headings).toEqual([
-      { id: "总览", level: 1, text: "总览", index: 1 },
-      { id: "功能", level: 2, text: "功能", index: 2 },
-      { id: "功能-2", level: 3, text: "功能", index: 3 }
+      { id: "总览", level: 1, text: "总览", index: 1, lineNumber: 1 },
+      { id: "功能", level: 2, text: "功能", index: 2, lineNumber: 3 },
+      { id: "功能-2", level: 3, text: "功能", index: 3, lineNumber: 9 }
+    ]);
+  });
+
+  it("保留 CRLF、重复标题和缩进标题的真实源行，并忽略未闭合的长围栏", () => {
+    const markdown = [
+      "前言", "", "# 相同标题", "", "   ## 相同标题", "", "````md", "# 围栏内",
+      "```", "## 短围栏未关闭", "~~~", "### 不同符号未关闭", "````", "", "### 结尾", "```", "# 未闭合围栏内"
+    ].join("\r\n");
+
+    expect(parseHeadings(markdown).map(({ id, lineNumber }) => ({ id, lineNumber }))).toEqual([
+      { id: "相同标题", lineNumber: 3 },
+      { id: "相同标题-2", lineNumber: 5 },
+      { id: "结尾", lineNumber: 15 }
     ]);
   });
 
