@@ -50,6 +50,14 @@ npm run lint
 npm test
 ```
 
+双栏浏览器回归（先在另一个终端启动 `npm run dev`，也可使用已启动的 Vite 服务）：
+
+```powershell
+npm run test:split
+```
+
+该脚本通过 Playwright CLI 检查双栏初始化、双向编辑、公式、快速切换及桌面/窄屏布局；首次运行可能需要下载 CLI 和浏览器。截图写入 `output/playwright/`。
+
 生成 Windows 安装包和便携版：
 
 ```powershell
@@ -145,3 +153,7 @@ git log --oneline --decorate -5
 - 修改需求或设计文档时，应同步更新本 README 中的项目说明。
 - 如果新增开发规则、构建方式或目录结构，应同步更新 `AGENTS.md`。
 - Markdown 文档统一按 UTF-8 和 LF 换行维护。
+
+## 0.1.4 双栏修复与验证（2026-10-15）
+
+本次补齐 Crepe LaTeX 的 CodeMirror 依赖，修复右侧空白、正文过窄和同步回写问题；Vite 不再监听发布产物，开发和打包可以并行。`npm run test:split` 已连续三轮通过，打包版也已验证本地文件打开、双向编辑、公式、真实保存与正常关闭。Windows 安装包和便携版已重新生成；详细过程及语法边界见 [验收记录](docs/双栏渲染修复与验收-0.1.4.md)。

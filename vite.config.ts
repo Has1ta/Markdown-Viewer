@@ -7,7 +7,14 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
     port: 5173,
-    strictPort: true
+    strictPort: true,
+    watch: {
+      // 发布目录会在打包时重命名；监听这些产物会在 Windows 锁目录并触发无关热更新。
+      ignored: ["**/release/**", "**/dist-electron/**", "**/output/**", "**/.playwright-cli/**"]
+    }
+  },
+  optimizeDeps: {
+    entries: ["index.html"]
   },
   build: {
     outDir: "dist",

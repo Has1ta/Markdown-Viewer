@@ -1,6 +1,7 @@
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { CrepeBuilder } from "@milkdown/crepe/builder";
 import { blockEdit } from "@milkdown/crepe/feature/block-edit";
+import { codeMirror } from "@milkdown/crepe/feature/code-mirror";
 import { cursor } from "@milkdown/crepe/feature/cursor";
 import { imageBlock } from "@milkdown/crepe/feature/image-block";
 import { linkTooltip } from "@milkdown/crepe/feature/link-tooltip";
@@ -10,9 +11,11 @@ import { placeholder } from "@milkdown/crepe/feature/placeholder";
 import { table } from "@milkdown/crepe/feature/table";
 import { toolbar } from "@milkdown/crepe/feature/toolbar";
 import { replaceAll } from "@milkdown/utils";
+import { EmptyState } from "../components/EmptyState";
 import "@milkdown/crepe/theme/common/prosemirror.css";
 import "@milkdown/crepe/theme/common/reset.css";
 import "@milkdown/crepe/theme/common/cursor.css";
+import "@milkdown/crepe/theme/common/code-mirror.css";
 import "@milkdown/crepe/theme/common/list-item.css";
 import "@milkdown/crepe/theme/common/latex.css";
 import "@milkdown/crepe/theme/common/link-tooltip.css";
@@ -29,12 +32,13 @@ interface RenderEditEditorProps {
 }
 
 export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEditorProps) {
+  const [hasInitializationError, setHasInitializationError] = useState(false);
   const editorHostRef = useRef<HTMLDivElement | null>(null);
   const crepeRef = useRef<CrepeBuilder | null>(null);
   const markdownRef = useRef(markdown);
+  const renderedMarkdownRef = useRef<string | null>(null);
   const onChangeRef = useRef(onChangeMarkdown);
   const isApplyingExternalRef = useRef(false);
-  const externalSyncTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     onChangeRef.current = onChangeMarkdown;
@@ -46,38 +50,56 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
     }
 
     let isDisposed = false;
-    const crepe = createCrepe(editorHostRef.current, markdownRef.current, (nextMarkdown) => {
+    let isReady = false;
+    // StrictMode 重挂载或快速切换视图时，各实例只操作自己的挂载节点。
+    const mount = document.createElement("div");
+    editorHostRef.current.append(mount);
+    const crepe = createCrepe(mount, markdownRef.current, (nextMarkdown) => {
+      if (isDisposed || !isReady) {
+        return;
+      }
+
       if (isApplyingExternalRef.current) {
-        markdownRef.current = nextMarkdown;
         return;
       }
 
-      if (markdownRef.current === nextMarkdown) {
+      if (renderedMarkdownRef.current === nextMarkdown) {
         return;
       }
 
+      renderedMarkdownRef.current = nextMarkdown;
       markdownRef.current = nextMarkdown;
       onChangeRef.current(nextMarkdown);
     });
 
-    void crepe.create().then(() => {
+    const creation = crepe.create();
+    void creation.then(() => {
       if (isDisposed) {
-        void crepe.destroy();
         return;
       }
 
       crepeRef.current = crepe;
-      syncCrepeMarkdown(crepe, markdownRef.current, null, isApplyingExternalRef, externalSyncTimerRef);
+      syncCrepeMarkdown(crepe, markdownRef.current, null, isApplyingExternalRef);
+      renderedMarkdownRef.current = crepe.getMarkdown();
+      isReady = true;
+    }).catch((error: unknown) => {
+      if (!isDisposed) {
+        crepeRef.current = null;
+        console.error("双栏渲染编辑器初始化失败：", error);
+        setHasInitializationError(true);
+      }
     });
 
     return () => {
       isDisposed = true;
+      isReady = false;
       crepeRef.current = null;
-      if (externalSyncTimerRef.current !== null) {
-        window.clearTimeout(externalSyncTimerRef.current);
-        externalSyncTimerRef.current = null;
-      }
-      void crepe.destroy();
+      mount.remove();
+      isApplyingExternalRef.current = false;
+      // 只在创建成功后销毁，避免 Milkdown 在创建失败后一直等待 OnCreate 状态结束。
+      void creation.then(() => crepe.destroy(), () => undefined).catch((error: unknown) => {
+        console.error("双栏渲染编辑器清理失败：", error);
+      });
     };
   }, []);
 
@@ -94,11 +116,22 @@ export function RenderEditEditor({ markdown, onChangeMarkdown }: RenderEditEdito
     }
 
     const scrollHost = editorHostRef.current?.querySelector<HTMLElement>(".milkdown");
-    syncCrepeMarkdown(crepe, markdown, scrollHost ?? null, isApplyingExternalRef, externalSyncTimerRef);
+    syncCrepeMarkdown(crepe, markdown, scrollHost ?? null, isApplyingExternalRef);
+    // 记录编辑器规范化后的快照，插件的格式整理不应反向改写外部源码。
+    renderedMarkdownRef.current = crepe.getMarkdown();
     markdownRef.current = markdown;
   }, [markdown]);
 
-  return <div className="render-edit-editor" ref={editorHostRef} aria-label="Markdown 渲染编辑器" />;
+  return (
+    <div className="render-edit-editor" aria-label="Markdown 渲染编辑器">
+      {hasInitializationError && (
+        <div role="alert">
+          <EmptyState title="渲染编辑器加载失败" description="可继续在左侧编辑源码，或切换视图后重试。" />
+        </div>
+      )}
+      <div ref={editorHostRef} hidden={hasInitializationError} />
+    </div>
+  );
 }
 
 function createCrepe(root: HTMLElement, defaultValue: string, onMarkdownUpdated: (markdown: string) => void) {
@@ -108,6 +141,8 @@ function createCrepe(root: HTMLElement, defaultValue: string, onMarkdownUpdated:
   })
     .addFeature(cursor)
     .addFeature(listItem)
+    // LaTeX 块级公式依赖 Crepe 的 CodeMirror 代码块视图。
+    .addFeature(codeMirror)
     .addFeature(latex)
     .addFeature(linkTooltip)
     .addFeature(imageBlock)
@@ -118,7 +153,10 @@ function createCrepe(root: HTMLElement, defaultValue: string, onMarkdownUpdated:
 
   crepe.on((listener) => {
     listener.markdownUpdated((_, nextMarkdown) => {
-      onMarkdownUpdated(nextMarkdown);
+      // 忽略外部替换前尚未触发的旧文档回调，真实输入只按当前文档上抛。
+      if (nextMarkdown === crepe.getMarkdown()) {
+        onMarkdownUpdated(nextMarkdown);
+      }
     });
   });
 
@@ -129,8 +167,7 @@ function syncCrepeMarkdown(
   crepe: CrepeBuilder,
   markdown: string,
   scrollHost: HTMLElement | null,
-  isApplyingExternalRef: MutableRefObject<boolean>,
-  externalSyncTimerRef: MutableRefObject<number | null>
+  isApplyingExternalRef: MutableRefObject<boolean>
 ) {
   if (crepe.getMarkdown() === markdown) {
     return;
@@ -138,22 +175,18 @@ function syncCrepeMarkdown(
 
   const scrollTop = scrollHost?.scrollTop ?? 0;
 
-  if (externalSyncTimerRef.current !== null) {
-    window.clearTimeout(externalSyncTimerRef.current);
-    externalSyncTimerRef.current = null;
-  }
-
   isApplyingExternalRef.current = true;
-  crepe.editor.action(replaceAll(markdown, true));
+  try {
+    // flush=true 直接替换状态，不触发 markdownUpdated；无需延时屏蔽用户编辑。
+    crepe.editor.action(replaceAll(markdown, true));
+  } finally {
+    isApplyingExternalRef.current = false;
+  }
   window.requestAnimationFrame(() => {
     if (scrollHost) {
       scrollHost.scrollTop = scrollTop;
     }
   });
-  externalSyncTimerRef.current = window.setTimeout(() => {
-    isApplyingExternalRef.current = false;
-    externalSyncTimerRef.current = null;
-  }, 250);
 }
 
 export default RenderEditEditor;

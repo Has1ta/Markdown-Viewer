@@ -2,7 +2,7 @@
 
 ## 项目说明
 
-本项目用于记录 Markdown Viewer v2 重置过程中的需求、界面风格和后续开发资料。当前以 Markdown 文档为主，未来可能加入桌面应用源码、原型资源和构建配置。
+本项目是基于 Electron + Vite + React + TypeScript 的 Windows Markdown 阅读与编辑应用，同时维护需求、界面风格和测试发布资料。
 
 ## 默认语言
 
@@ -37,7 +37,7 @@
 - `src/assets/`：由源码导入并参与 Vite 打包的内置示例图片等资源。
 - `public/`：静态资源，例如 favicon 等需要固定根路径的公开资源。
 - `public/app-icon.ico`：Electron 主窗口与打包程序图标的统一来源资源，更新图标时应与 `public/favicon.svg` 保持风格一致；`public/app-icon.png` 作为位图备份保留。
-- `scripts/`：打包钩子脚本，例如保留中英文 Electron locale 的 `after-pack.cjs`，以及生成 release 卸载辅助文件的 `write-release-uninstaller.cjs`。
+- `scripts/`：打包钩子、release 卸载辅助文件生成，以及 `verify-split-editor.cjs` 双栏浏览器回归脚本。
 - `tests/`：Markdown 工具函数等自动化测试。
 - `docs/`：测试、打包与发布记录。
 - `CHANGELOG.md`：版本变更记录。
@@ -62,13 +62,14 @@
 - 如果项目从文档阶段进入可运行应用阶段，应建立明确的提交节奏，例如需求整理、UI 原型、核心功能、打包发布分别提交。
 - 进入源码阶段后，应以 `软件制作方案.md` 的阶段划分为主线推进，阶段完成后更新验收状态。
 - 当前源码阶段使用 `npm run dev` 启动 Electron 开发窗口，使用 `npm run lint` 检查代码，使用 `npm test` 运行工具函数测试，使用 `npm run build` 验证 TypeScript 与 Vite 生产构建，使用 `npm run dist` 生成 Windows 安装包和便携版。
-- 代码修改完成后的标准收尾顺序建议为：先运行必要的 lint/test/build 或界面验证，再运行 `npm run dist`，最后确认 `release/Markdown Viewer Portable 0.1.1.exe` 和安装包的修改时间已经更新。
+- 代码修改完成后的标准收尾顺序建议为：先运行必要的 lint/test/build 或界面验证，再运行 `npm run dist`，最后确认 `release/` 中与 `package.json` 当前版本一致的便携版和安装包修改时间已经更新。
 - `dist/`、`dist-electron/`、`node_modules/` 和打包产物不应提交到 Git。
 - `release/uninstall.cmd` 与 `release/uninstall.ps1` 由 `scripts/write-release-uninstaller.cjs` 自动生成，用于查找 Windows 已安装版本的官方卸载命令；便携版移除方式仍是删除便携 exe。
 - 安装版通过 electron-builder `fileAssociations` 注册 `.md`、`.markdown`、`.mdown`、`.mkd` 文件关联，并使用 NSIS `perMachine: true` 保证 Windows 文件关联生效；便携版不自动注册文件关联。
 - Electron 打包时应用代码已经由 Vite/Electron 编译进 `dist/` 与 `dist-electron/`，前端库默认应保持在 `devDependencies`，避免发布包重复携带运行时不需要的 `node_modules`。
 - Windows 打包默认只保留 `zh-CN.pak` 和 `en-US.pak`；如果未来扩展多语言，应同步调整 `scripts/after-pack.cjs` 并重新记录包体积。
 - Vite 的 `base` 必须保持为 `./`，否则 Electron 打包后通过 `file://` 加载时会把 `/assets/...` 指向磁盘根目录，造成窗口空白。
+- Vite 文件监听必须排除 `release/`、`dist-electron/`、`output/` 和 `.playwright-cli/`；依赖扫描入口限定 `index.html`。Windows 上监听解压目录会造成打包目录重命名 `EPERM`、无关热刷新，甚至监听 exe 时触发 `EBUSY` 崩溃。
 - 窗口关闭保护必须依赖渲染进程 ready 握手；不要在 React 未启动时强制拦截关闭，否则打包资源加载失败时会出现空白窗口且无法关闭。
 - 做阅读视图相关修改后，应检查宽屏与窄屏下是否存在页面级横向溢出，并优先让表格和代码块在自身容器内滚动。
 - 做目录导航相关修改时，应区分“点击目录触发正文滚动”和“普通阅读滚动更新当前章节高亮”；侧栏自动跟随只能滚动侧栏自身，不能反向滚动正文。
@@ -81,8 +82,13 @@
 - 渲染编辑侧当前使用 Crepe/Milkdown；外部写入应通过编辑器 API 同步并用 `isApplyingExternalRef` 抑制回写，避免右侧接收源码变化时再次触发父级更新。
 - CodeMirror 的 `updateListener` 不应逐事务同步调用父级 `setMarkdown`；源码侧输入应按 animation frame 合并为最新 Markdown 再上抛，避免快速输入造成 React 嵌套更新。
 - Crepe 相关资源目前只在双栏视图懒加载；后续若调整功能插件或打包分块，应同时检查 `npm run build` 的 chunk 体积和默认渲染视图首屏资源。
+- Crepe 的 `latex` feature 强制依赖 `codeMirror` feature，必须同时启用并导入 `code-mirror.css`；源码侧使用 CodeMirror 不等于已为 Crepe 注册此插件。不可为了减小包体积单独移除这个依赖。
+- Crepe 异步创建应为每个 effect 使用独立挂载节点，并在对应创建成功后再销毁；创建失败需显示可见提示，不对停留在 `OnCreate` 状态的失败实例调用 `destroy()`。
+- `replaceAll(markdown, true)` 直接替换编辑器状态，不需要固定 250ms 的回写屏蔽窗口；抑制只覆盖同步操作本身，记录外部同步后的规范化快照，并忽略旧回调及内容未变的格式整理，避免吞掉真实输入或自动改写源码。
+- 双栏正文样式须以 `.render-edit-editor .milkdown > .ProseMirror` 限定作用域并提高优先级，避免 Crepe 懒加载 reset 覆盖内边距和字号，同时不能影响浮层内的嵌套编辑器。
+- 双栏相关修改可先启动 `npm run dev`，再运行 `npm run test:split` 检查初始化、双向同步、快速切换与响应式；该脚本使用 Playwright CLI，并将截图存入 `output/playwright/`。
 - 主阅读视图使用 `marked`，数学公式需通过 `marked-katex-extension` 与本地 `katex/dist/katex.min.css` 显式启用；另用 `src/markdown/math-extension.ts` 支持常见的 `\(...\)` 行内及 `\[...\]` 块级定界符。双栏 Crepe 渲染编辑视图需同时启用 `latex` feature 和对应主题样式。验证各种定界符并确认打包资源离线可用。
-- 渲染编辑侧应优先使用 `CrepeBuilder` 加按需 feature 导入，不要轻易改回 `@milkdown/crepe` 根入口；样式也应按当前启用功能导入，避免把已关闭的 AI、Latex、内置 CodeMirror 和 KaTeX 资源重新打进产物。
+- 渲染编辑侧应优先使用 `CrepeBuilder` 加按需 feature 导入，不要轻易改回 `@milkdown/crepe` 根入口；样式也应按当前启用功能导入，避免引入未使用的 AI 等功能。公式功能启用时保留 Latex、内置 CodeMirror 及 KaTeX 所需资源。
 - 做代码块工具条相关修改时，应保持 `RenderEditor` 事件代理方式，语言选择需要写回 fenced code block 的 info string，复制结果用按钮状态、Toast 和 aria-live 通知反馈。
 - 做本地图片路径相关修改时，不能在渲染层直接拼接 Windows 本地路径；应通过 preload 白名单 API 让主进程校验 Markdown 文件目录、图片扩展名和 `file://` URL。
 - 做本地文件工作流相关修改时，所有文件读写必须通过 preload 暴露的白名单 API；打开文件、拖拽替换、窗口关闭等危险操作必须复用同一个未保存确认流程。

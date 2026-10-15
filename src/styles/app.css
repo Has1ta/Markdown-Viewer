@@ -672,106 +672,193 @@ input:focus-visible,
 
 .render-edit-editor {
   width: 100%;
+  min-width: 0;
   overflow: auto;
   background: var(--bg-panel);
 }
 
-.render-edit-editor .ProseMirror {
+.render-edit-editor .milkdown {
+  --crepe-color-background: var(--bg-panel);
+  --crepe-color-on-background: var(--text-primary);
+  --crepe-color-surface: var(--bg-subtle);
+  --crepe-color-surface-low: var(--bg-hover);
+  --crepe-color-on-surface: var(--text-primary);
+  --crepe-color-on-surface-variant: var(--text-secondary);
+  --crepe-color-outline: var(--text-muted);
+  --crepe-color-primary: var(--accent-primary);
+  --crepe-color-secondary: var(--accent-soft);
+  --crepe-color-on-secondary: var(--text-primary);
+  --crepe-color-inverse: var(--text-primary);
+  --crepe-color-on-inverse: var(--bg-panel);
+  --crepe-color-inline-code: var(--text-secondary);
+  --crepe-color-hover: var(--bg-hover);
+  --crepe-color-selected: var(--editor-selection);
+  --crepe-color-inline-area: var(--code-bg);
+  --crepe-font-title: var(--font-serif);
+  --crepe-font-default: var(--font-sans);
+  --crepe-font-code: var(--font-mono);
+
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* 提高正文优先级，避免 Crepe 懒加载样式覆盖；不影响浮层中的嵌套编辑器。 */
+.render-edit-editor .milkdown > .ProseMirror {
+  min-width: 0;
   min-height: 578px;
   padding: var(--space-8);
   outline: none;
   color: var(--text-primary);
   font-size: 16px;
   line-height: 1.78;
+  overflow-wrap: anywhere;
 }
 
-.render-edit-editor .ProseMirror-focused {
+.render-edit-editor .milkdown > .ProseMirror-focused {
   box-shadow: inset 0 0 0 2px rgba(143, 110, 72, 0.18);
 }
 
-.render-edit-editor .ProseMirror > *:first-child {
+.render-edit-editor .milkdown > .ProseMirror > *:first-child,
+.render-edit-editor .milkdown > .ProseMirror > .ProseMirror-widget:first-child + * {
   margin-top: 0;
 }
 
-.render-edit-editor .ProseMirror > *:last-child {
+.render-edit-editor .milkdown > .ProseMirror > *:last-child {
   margin-bottom: 0;
 }
 
-.render-edit-editor h1,
-.render-edit-editor h2,
-.render-edit-editor h3,
-.render-edit-editor h4,
-.render-edit-editor h5,
-.render-edit-editor h6 {
+.render-edit-editor .milkdown > .ProseMirror h1,
+.render-edit-editor .milkdown > .ProseMirror h2,
+.render-edit-editor .milkdown > .ProseMirror h3,
+.render-edit-editor .milkdown > .ProseMirror h4,
+.render-edit-editor .milkdown > .ProseMirror h5,
+.render-edit-editor .milkdown > .ProseMirror h6 {
   margin: 1.35em 0 0.55em;
+  padding: 0;
   color: var(--text-primary);
   font-family: var(--font-serif);
   font-weight: 600;
   line-height: 1.25;
 }
 
-.render-edit-editor h1 {
+.render-edit-editor .milkdown > .ProseMirror h1 {
   font-size: 34px;
 }
 
-.render-edit-editor h2 {
+.render-edit-editor .milkdown > .ProseMirror h2 {
   font-size: 26px;
 }
 
-.render-edit-editor h3 {
+.render-edit-editor .milkdown > .ProseMirror h3 {
   font-size: 21px;
 }
 
-.render-edit-editor p,
-.render-edit-editor ul,
-.render-edit-editor ol,
-.render-edit-editor blockquote,
-.render-edit-editor pre {
+.render-edit-editor .milkdown > .ProseMirror h4,
+.render-edit-editor .milkdown > .ProseMirror h5,
+.render-edit-editor .milkdown > .ProseMirror h6 {
+  font-size: 18px;
+}
+
+.render-edit-editor .milkdown > .ProseMirror p,
+.render-edit-editor .milkdown > .ProseMirror ul,
+.render-edit-editor .milkdown > .ProseMirror ol,
+.render-edit-editor .milkdown > .ProseMirror blockquote,
+.render-edit-editor .milkdown > .ProseMirror pre {
   margin: 0 0 var(--space-4);
 }
 
-.render-edit-editor ul,
-.render-edit-editor ol {
-  padding-left: var(--space-7);
+.render-edit-editor .milkdown > .ProseMirror p {
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.78;
 }
 
-.render-edit-editor blockquote {
+.render-edit-editor .milkdown > .ProseMirror ul,
+.render-edit-editor .milkdown > .ProseMirror ol {
+  padding: 0;
+}
+
+.render-edit-editor .milkdown > .ProseMirror .list-item > .children > p,
+.render-edit-editor .milkdown > .ProseMirror td > p:last-child,
+.render-edit-editor .milkdown > .ProseMirror th > p:last-child,
+.render-edit-editor .milkdown > .ProseMirror blockquote > p:last-child {
+  margin-bottom: 0;
+}
+
+.render-edit-editor .milkdown > .ProseMirror blockquote {
   padding: var(--space-2) var(--space-4);
   border-left: 3px solid var(--accent-primary);
   background: var(--bg-subtle);
   color: var(--text-secondary);
+  box-sizing: border-box;
 }
 
-.render-edit-editor code {
+.render-edit-editor .milkdown > .ProseMirror blockquote::before {
+  content: none;
+}
+
+.render-edit-editor .milkdown > .ProseMirror code {
   padding: 0.12em 0.32em;
   border-radius: var(--radius-sm);
   background: var(--code-bg);
-  color: var(--code-text);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.92em;
+  display: inline;
+  line-height: inherit;
 }
 
-.render-edit-editor pre {
+.render-edit-editor .milkdown > .ProseMirror pre {
+  max-width: 100%;
   overflow: auto;
   padding: var(--space-4);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   background: var(--code-bg);
+  overflow-wrap: normal;
 }
 
-.render-edit-editor pre code {
+.render-edit-editor .milkdown > .ProseMirror pre code {
   padding: 0;
   background: transparent;
 }
 
-.render-edit-editor a {
+.render-edit-editor .milkdown > .ProseMirror a {
   color: var(--accent-primary);
 }
 
-.render-edit-editor img {
+.render-edit-editor .milkdown > .ProseMirror img {
   max-width: 100%;
   height: auto;
   border-radius: var(--radius-lg);
+}
+
+.render-edit-editor .milkdown .milkdown-code-block,
+.render-edit-editor .milkdown .milkdown-table-block,
+.render-edit-editor .milkdown .milkdown-code-block .cm-editor {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.render-edit-editor .milkdown .milkdown-code-block .tools {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.render-edit-editor .milkdown .milkdown-code-block .cm-scroller,
+.render-edit-editor .milkdown .milkdown-table-block .table-wrapper,
+.render-edit-editor .milkdown .milkdown-code-block .preview {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.render-edit-editor .milkdown .katex-display,
+.render-edit-editor .milkdown span[data-type="math_inline"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overflow-wrap: normal;
 }
 
 .bottom-bar {

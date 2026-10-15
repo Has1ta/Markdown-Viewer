@@ -2,7 +2,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["dist/**", "dist-electron/**", "release/**", "node_modules/**", "output/**"]
+    ignores: ["dist/**", "dist-electron/**", "release/**", "node_modules/**", "output/**", ".playwright-cli/**"]
   },
   ...tseslint.configs.recommended,
   {

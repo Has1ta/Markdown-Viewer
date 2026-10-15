@@ -109,19 +109,19 @@
 
   .split-pane .source-editor,
   .render-edit-editor,
-  .render-edit-editor .ProseMirror {
+  .render-edit-editor .milkdown > .ProseMirror {
     min-height: 360px;
   }
 
-  .render-edit-editor .ProseMirror {
+  .render-edit-editor .milkdown > .ProseMirror {
     padding: var(--space-6) var(--space-5);
   }
 
-  .render-edit-editor h1 {
+  .render-edit-editor .milkdown > .ProseMirror h1 {
     font-size: 30px;
   }
 
-  .render-edit-editor h2 {
+  .render-edit-editor .milkdown > .ProseMirror h2 {
     font-size: 24px;
   }
 
