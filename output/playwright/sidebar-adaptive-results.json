@@ -1,0 +1,503 @@
+{
+  "pass": true,
+  "layouts": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 600
+      },
+      "panel": {
+        "top": 24,
+        "bottom": 576,
+        "left": 8.666666984558105,
+        "right": 304.6666669845581,
+        "height": 552,
+        "width": 296
+      },
+      "header": {
+        "top": 394.46875,
+        "bottom": 421.8020839691162,
+        "left": 25.33333396911621,
+        "right": 288.00002098083496,
+        "height": 27.33333396911621,
+        "width": 262.66668701171875
+      },
+      "first": {
+        "top": 421.8020935058594,
+        "bottom": 477.1354293823242,
+        "left": 25.33333396911621,
+        "right": 272.6666774749756,
+        "height": 55.333335876464844,
+        "width": 247.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 421.8020935058594,
+        "bottom": 559.3333435058594,
+        "left": 25.33333396911621,
+        "right": 288.00002098083496,
+        "height": 137.53125,
+        "width": 262.66668701171875
+      },
+      "toc": {
+        "top": 140,
+        "bottom": 361.8020935058594,
+        "left": 25.33333396911621,
+        "right": 288.00002098083496,
+        "height": 221.80209350585938,
+        "width": 262.66668701171875
+      },
+      "pageWidth": 1265,
+      "recentScrollWidth": 247,
+      "recentClientWidth": 247,
+      "tocScrollHeight": 2680,
+      "tocClientHeight": 222,
+      "recentScrollHeight": 499,
+      "recentClientHeight": 138,
+      "tocLast": {
+        "bottom": 362,
+        "listBottom": 361.8020935058594,
+        "top": 282,
+        "listTop": 140,
+        "scrollTop": 2458,
+        "maximum": 2458
+      },
+      "recentLast": {
+        "bottom": 559.1354293823242,
+        "listBottom": 559.3333435058594,
+        "top": 503.8020935058594,
+        "listTop": 421.8020935058594,
+        "scrollTop": 361.3333435058594,
+        "maximum": 361
+      }
+    },
+    {
+      "viewport": {
+        "width": 1036,
+        "height": 550
+      },
+      "panel": {
+        "top": 24,
+        "bottom": 526,
+        "left": 8.666666984558105,
+        "right": 260.6666669845581,
+        "height": 502,
+        "width": 252
+      },
+      "header": {
+        "top": 361.96875,
+        "bottom": 389.3020839691162,
+        "left": 25.33333396911621,
+        "right": 244.0000057220459,
+        "height": 27.33333396911621,
+        "width": 218.6666717529297
+      },
+      "first": {
+        "top": 389.3020935058594,
+        "bottom": 444.6354293823242,
+        "left": 25.33333396911621,
+        "right": 228.6666774749756,
+        "height": 55.333335876464844,
+        "width": 203.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 389.3020935058594,
+        "bottom": 509.3333435058594,
+        "left": 25.33333396911621,
+        "right": 244.0000057220459,
+        "height": 120.03125,
+        "width": 218.6666717529297
+      },
+      "toc": {
+        "top": 140,
+        "bottom": 329.3020935058594,
+        "left": 25.33333396911621,
+        "right": 244.0000057220459,
+        "height": 189.30209350585938,
+        "width": 218.6666717529297
+      },
+      "pageWidth": 1021,
+      "recentScrollWidth": 203,
+      "recentClientWidth": 203,
+      "tocScrollHeight": 3533,
+      "tocClientHeight": 189,
+      "recentScrollHeight": 499,
+      "recentClientHeight": 120,
+      "tocLast": {
+        "bottom": 329.33333587646484,
+        "listBottom": 329.3020935058594,
+        "top": 228,
+        "listTop": 140,
+        "scrollTop": 3344,
+        "maximum": 3344
+      },
+      "recentLast": {
+        "bottom": 509.30208587646484,
+        "listBottom": 509.3333435058594,
+        "top": 453.96875,
+        "listTop": 389.3020935058594,
+        "scrollTop": 378.6666564941406,
+        "maximum": 379
+      }
+    },
+    {
+      "viewport": {
+        "width": 960,
+        "height": 500
+      },
+      "panel": {
+        "top": 24,
+        "bottom": 476,
+        "left": 8.666666984558105,
+        "right": 260.6666669845581,
+        "height": 452,
+        "width": 252
+      },
+      "header": {
+        "top": 329.46875,
+        "bottom": 356.8020839691162,
+        "left": 25.33333396911621,
+        "right": 244.0000057220459,
+        "height": 27.33333396911621,
+        "width": 218.6666717529297
+      },
+      "first": {
+        "top": 356.8020935058594,
+        "bottom": 412.1354293823242,
+        "left": 25.33333396911621,
+        "right": 228.6666774749756,
+        "height": 55.333335876464844,
+        "width": 203.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 356.8020935058594,
+        "bottom": 459.3333435058594,
+        "left": 25.33333396911621,
+        "right": 244.0000057220459,
+        "height": 102.53125,
+        "width": 218.6666717529297
+      },
+      "toc": {
+        "top": 140,
+        "bottom": 296.8020935058594,
+        "left": 25.33333396911621,
+        "right": 244.0000057220459,
+        "height": 156.80209350585938,
+        "width": 218.6666717529297
+      },
+      "pageWidth": 945,
+      "recentScrollWidth": 203,
+      "recentClientWidth": 203,
+      "tocScrollHeight": 3533,
+      "tocClientHeight": 157,
+      "recentScrollHeight": 499,
+      "recentClientHeight": 103,
+      "tocLast": {
+        "bottom": 296.6666793823242,
+        "listBottom": 296.8020935058594,
+        "top": 195.33334350585938,
+        "listTop": 140,
+        "scrollTop": 3376.666748046875,
+        "maximum": 3376
+      },
+      "recentLast": {
+        "bottom": 459.4687728881836,
+        "listBottom": 459.3333435058594,
+        "top": 404.13543701171875,
+        "listTop": 356.8020935058594,
+        "scrollTop": 396,
+        "maximum": 396
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "panel": {
+        "top": 24,
+        "bottom": 876,
+        "left": 8.666666984558105,
+        "right": 304.6666669845581,
+        "height": 852,
+        "width": 296
+      },
+      "header": {
+        "top": 589.46875,
+        "bottom": 616.8020839691162,
+        "left": 25.33333396911621,
+        "right": 288.00002098083496,
+        "height": 27.33333396911621,
+        "width": 262.66668701171875
+      },
+      "first": {
+        "top": 616.8021240234375,
+        "bottom": 672.1354598999023,
+        "left": 25.33333396911621,
+        "right": 272.6666774749756,
+        "height": 55.333335876464844,
+        "width": 247.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 616.8021240234375,
+        "bottom": 859.3333740234375,
+        "left": 25.33333396911621,
+        "right": 288.00002098083496,
+        "height": 242.53125,
+        "width": 262.66668701171875
+      },
+      "toc": {
+        "top": 140,
+        "bottom": 556.8020935058594,
+        "left": 25.33333396911621,
+        "right": 288.00002098083496,
+        "height": 416.8020935058594,
+        "width": 262.66668701171875
+      },
+      "pageWidth": 1425,
+      "recentScrollWidth": 247,
+      "recentClientWidth": 247,
+      "tocScrollHeight": 2680,
+      "tocClientHeight": 417,
+      "recentScrollHeight": 499,
+      "recentClientHeight": 243,
+      "tocLast": {
+        "bottom": 556.6666870117188,
+        "listBottom": 556.8020935058594,
+        "top": 476.66668701171875,
+        "listTop": 140,
+        "scrollTop": 2263.333251953125,
+        "maximum": 2263
+      },
+      "recentLast": {
+        "bottom": 859.4687728881836,
+        "listBottom": 859.3333740234375,
+        "top": 804.1354370117188,
+        "listTop": 616.8021240234375,
+        "scrollTop": 256,
+        "maximum": 256
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 650
+      },
+      "panel": {
+        "top": 64,
+        "bottom": 638,
+        "left": 12,
+        "right": 308,
+        "height": 574,
+        "width": 296
+      },
+      "header": {
+        "top": 448.7708435058594,
+        "bottom": 476.1041774749756,
+        "left": 28.666667938232422,
+        "right": 291.3333549499512,
+        "height": 27.33333396911621,
+        "width": 262.66668701171875
+      },
+      "first": {
+        "top": 476.10418701171875,
+        "bottom": 531.4375228881836,
+        "left": 28.666667938232422,
+        "right": 276.0000114440918,
+        "height": 55.333335876464844,
+        "width": 247.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 476.10418701171875,
+        "bottom": 621.3333587646484,
+        "left": 28.666667938232422,
+        "right": 291.3333549499512,
+        "height": 145.2291717529297,
+        "width": 262.66668701171875
+      },
+      "toc": {
+        "top": 180,
+        "bottom": 416.1041717529297,
+        "left": 28.666667938232422,
+        "right": 291.3333549499512,
+        "height": 236.1041717529297,
+        "width": 262.66668701171875
+      },
+      "pageWidth": 375,
+      "recentScrollWidth": 247,
+      "recentClientWidth": 247,
+      "tocScrollHeight": 2680,
+      "tocClientHeight": 236,
+      "recentScrollHeight": 499,
+      "recentClientHeight": 145,
+      "tocLast": {
+        "bottom": 416,
+        "listBottom": 416.1041717529297,
+        "top": 336,
+        "listTop": 180,
+        "scrollTop": 2444,
+        "maximum": 2444
+      },
+      "recentLast": {
+        "bottom": 621.4375228881836,
+        "listBottom": 621.3333587646484,
+        "top": 566.1041870117188,
+        "listTop": 476.10418701171875,
+        "scrollTop": 353.3333435058594,
+        "maximum": 354
+      }
+    },
+    {
+      "viewport": {
+        "width": 960,
+        "height": 350
+      },
+      "panel": {
+        "top": 24,
+        "bottom": 326,
+        "left": 8.666666984558105,
+        "right": 260.6666669845581,
+        "height": 302,
+        "width": 252
+      },
+      "header": {
+        "top": 197.5,
+        "bottom": 224.8333339691162,
+        "left": 21.33333396911621,
+        "right": 248.0000057220459,
+        "height": 27.33333396911621,
+        "width": 226.6666717529297
+      },
+      "first": {
+        "top": 224.83334350585938,
+        "bottom": 272.1666793823242,
+        "left": 21.33333396911621,
+        "right": 232.6666774749756,
+        "height": 47.333335876464844,
+        "width": 211.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 224.83334350585938,
+        "bottom": 313.3333435058594,
+        "left": 21.33333396911621,
+        "right": 248.0000057220459,
+        "height": 88.5,
+        "width": 226.6666717529297
+      },
+      "toc": {
+        "top": 85.33333587646484,
+        "bottom": 180.83333587646484,
+        "left": 21.33333396911621,
+        "right": 248.0000057220459,
+        "height": 95.5,
+        "width": 226.6666717529297
+      },
+      "pageWidth": 945,
+      "recentScrollWidth": 211,
+      "recentClientWidth": 211,
+      "tocScrollHeight": 2219,
+      "tocClientHeight": 96,
+      "recentScrollHeight": 435,
+      "recentClientHeight": 89,
+      "tocLast": {
+        "bottom": 180.42708587646484,
+        "listBottom": 180.83333587646484,
+        "top": 113.64583587646484,
+        "listTop": 85.33333587646484,
+        "scrollTop": 2124,
+        "maximum": 2123
+      },
+      "recentLast": {
+        "bottom": 313.5000228881836,
+        "listBottom": 313.3333435058594,
+        "top": 266.16668701171875,
+        "listTop": 224.83334350585938,
+        "scrollTop": 346,
+        "maximum": 346
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 300
+      },
+      "panel": {
+        "top": 60,
+        "bottom": 288,
+        "left": 12,
+        "right": 308,
+        "height": 228,
+        "width": 296
+      },
+      "header": {
+        "top": 192.80209350585938,
+        "bottom": 220.1354274749756,
+        "left": 24.666667938232422,
+        "right": 295.3333549499512,
+        "height": 27.33333396911621,
+        "width": 270.66668701171875
+      },
+      "first": {
+        "top": 220.1354217529297,
+        "bottom": 267.46875762939453,
+        "left": 24.666667938232422,
+        "right": 280.0000114440918,
+        "height": 47.333335876464844,
+        "width": 255.33334350585938
+      },
+      "firstClickable": true,
+      "list": {
+        "top": 220.1354217529297,
+        "bottom": 275.3333396911621,
+        "left": 24.666667938232422,
+        "right": 295.3333549499512,
+        "height": 55.19791793823242,
+        "width": 270.66668701171875
+      },
+      "toc": {
+        "top": 121.33333587646484,
+        "bottom": 176.1354217529297,
+        "left": 24.666667938232422,
+        "right": 295.3333549499512,
+        "height": 54.802085876464844,
+        "width": 270.66668701171875
+      },
+      "pageWidth": 375,
+      "recentScrollWidth": 255,
+      "recentClientWidth": 255,
+      "tocScrollHeight": 2200,
+      "tocClientHeight": 55,
+      "recentScrollHeight": 435,
+      "recentClientHeight": 55,
+      "tocLast": {
+        "bottom": 176.1666717529297,
+        "listBottom": 176.1354217529297,
+        "top": 128.9791717529297,
+        "listTop": 121.33333587646484,
+        "scrollTop": 2144.666748046875,
+        "maximum": 2145
+      },
+      "recentLast": {
+        "bottom": 275.46875762939453,
+        "listBottom": 275.3333396911621,
+        "top": 228.1354217529297,
+        "listTop": 220.1354217529297,
+        "scrollTop": 379.3333435058594,
+        "maximum": 380
+      }
+    }
+  ],
+  "activeAfterResize": {
+    "itemTop": 164,
+    "itemBottom": 244,
+    "listTop": 140,
+    "listBottom": 329.3020935058594
+  },
+  "recentFileOpened": true,
+  "pageErrors": []
+}

@@ -46,31 +46,29 @@ export function Sidebar({ headings, activeHeadingId, recentFiles, onSelectHeadin
 
   useEffect(() => {
     const listElement = listRef.current;
-    const activeItem = listElement?.querySelector<HTMLElement>(".toc-item.is-active");
+    if (!listElement) return;
 
-    if (!listElement || !activeItem || activeItem.getClientRects().length === 0) {
-      return;
+    function followActiveHeading() {
+      if (!listElement) return;
+      const activeItem = listElement.querySelector<HTMLElement>(".toc-item.is-active");
+      if (!activeItem || activeItem.getClientRects().length === 0) return;
+      const listRect = listElement.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      const edgePadding = Math.min(24, listRect.height / 4);
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const behavior = prefersReducedMotion ? "auto" : "smooth";
+
+      if (itemRect.top < listRect.top + edgePadding) {
+        listElement.scrollBy({ top: itemRect.top - listRect.top - edgePadding, behavior });
+      } else if (itemRect.bottom > listRect.bottom - edgePadding) {
+        listElement.scrollBy({ top: itemRect.bottom - listRect.bottom + edgePadding, behavior });
+      }
     }
 
-    const listRect = listElement.getBoundingClientRect();
-    const itemRect = activeItem.getBoundingClientRect();
-    const edgePadding = 24;
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (itemRect.top < listRect.top + edgePadding) {
-      listElement.scrollBy({
-        top: itemRect.top - listRect.top - edgePadding,
-        behavior: prefersReducedMotion ? "auto" : "smooth"
-      });
-      return;
-    }
-
-    if (itemRect.bottom > listRect.bottom - edgePadding) {
-      listElement.scrollBy({
-        top: itemRect.bottom - listRect.bottom + edgePadding,
-        behavior: prefersReducedMotion ? "auto" : "smooth"
-      });
-    }
+    followActiveHeading();
+    const resizeObserver = new ResizeObserver(followActiveHeading);
+    resizeObserver.observe(listElement);
+    return () => resizeObserver.disconnect();
   }, [activeHeadingId, tocItems]);
 
   function toggleCollapsed(headingId: string) {

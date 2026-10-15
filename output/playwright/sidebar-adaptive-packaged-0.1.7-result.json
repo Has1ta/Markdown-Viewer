@@ -1,0 +1,451 @@
+{
+  "version": "0.1.7",
+  "executable": "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\release\\win-unpacked\\Markdown Viewer.exe",
+  "fixtures": [
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件1-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件2-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件3-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件4-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件5-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件6-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件7-用于验证较长文件名称与路径省略显示.md",
+    "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md"
+  ],
+  "opened": true,
+  "recentFilled": true,
+  "layouts": [
+    {
+      "width": 1280,
+      "height": 650,
+      "pageWidth": 1265,
+      "title": "最近文件1-用于验证较长文件名称与路径省略显示.md - Markdown Viewer v2",
+      "heading": "侧栏自适应真实文件1",
+      "scrollY": 0,
+      "sidebar": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 626,
+        "width": 296,
+        "height": 602,
+        "scrollTop": 0,
+        "scrollHeight": 602,
+        "clientHeight": 602
+      },
+      "panel": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 626,
+        "width": 296,
+        "height": 602,
+        "scrollTop": 0,
+        "scrollHeight": 601,
+        "clientHeight": 601
+      },
+      "toc": {
+        "x": 25.33333396911621,
+        "y": 140,
+        "top": 140,
+        "bottom": 394.3020935058594,
+        "width": 262.66668701171875,
+        "height": 254.30209350585938,
+        "scrollTop": 0,
+        "scrollHeight": 3744,
+        "clientHeight": 254
+      },
+      "recent": {
+        "x": 25.33333396911621,
+        "y": 410.3020935058594,
+        "top": 410.3020935058594,
+        "bottom": 609.3333435058594,
+        "width": 262.66668701171875,
+        "height": 199.03125,
+        "scrollTop": 0,
+        "scrollHeight": 198,
+        "clientHeight": 198
+      },
+      "recentList": {
+        "x": 25.33333396911621,
+        "y": 454.3020935058594,
+        "top": 454.3020935058594,
+        "bottom": 609.3333435058594,
+        "width": 262.66668701171875,
+        "height": 155.03125,
+        "scrollTop": 0,
+        "scrollHeight": 499,
+        "clientHeight": 155
+      },
+      "recentCount": 8,
+      "visibleRecent": [
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md",
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件7-用于验证较长文件名称与路径省略显示.md"
+      ],
+      "recentHeaderVisible": true,
+      "activeHeading": "侧栏自适应真实文件1",
+      "activeVisible": true
+    },
+    {
+      "width": 960,
+      "height": 550,
+      "pageWidth": 945,
+      "title": "最近文件1-用于验证较长文件名称与路径省略显示.md - Markdown Viewer v2",
+      "heading": "侧栏自适应真实文件1",
+      "scrollY": 0,
+      "sidebar": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 526,
+        "width": 252,
+        "height": 502,
+        "scrollTop": 0,
+        "scrollHeight": 502,
+        "clientHeight": 502
+      },
+      "panel": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 526,
+        "width": 252,
+        "height": 502,
+        "scrollTop": 0,
+        "scrollHeight": 501,
+        "clientHeight": 501
+      },
+      "toc": {
+        "x": 25.33333396911621,
+        "y": 140,
+        "top": 140,
+        "bottom": 329.3020935058594,
+        "width": 218.6666717529297,
+        "height": 189.30209350585938,
+        "scrollTop": 0,
+        "scrollHeight": 4651,
+        "clientHeight": 189
+      },
+      "recent": {
+        "x": 25.33333396911621,
+        "y": 345.3020935058594,
+        "top": 345.3020935058594,
+        "bottom": 509.3333435058594,
+        "width": 218.6666717529297,
+        "height": 164.03125,
+        "scrollTop": 0,
+        "scrollHeight": 163,
+        "clientHeight": 163
+      },
+      "recentList": {
+        "x": 25.33333396911621,
+        "y": 389.3020935058594,
+        "top": 389.3020935058594,
+        "bottom": 509.3333435058594,
+        "width": 218.6666717529297,
+        "height": 120.03125,
+        "scrollTop": 0,
+        "scrollHeight": 499,
+        "clientHeight": 120
+      },
+      "recentCount": 8,
+      "visibleRecent": [
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md",
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件7-用于验证较长文件名称与路径省略显示.md"
+      ],
+      "recentHeaderVisible": true,
+      "activeHeading": "侧栏自适应真实文件1",
+      "activeVisible": true
+    },
+    {
+      "width": 960,
+      "height": 550,
+      "pageWidth": 945,
+      "title": "最近文件2-用于验证较长文件名称与路径省略显示.md - Markdown Viewer v2",
+      "heading": "侧栏自适应真实文件2",
+      "scrollY": 26183.333984375,
+      "sidebar": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 526,
+        "width": 252,
+        "height": 502,
+        "scrollTop": 0,
+        "scrollHeight": 502,
+        "clientHeight": 502
+      },
+      "panel": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 526,
+        "width": 252,
+        "height": 502,
+        "scrollTop": 0,
+        "scrollHeight": 501,
+        "clientHeight": 501
+      },
+      "toc": {
+        "x": 25.33333396911621,
+        "y": 140,
+        "top": 140,
+        "bottom": 329.3020935058594,
+        "width": 218.6666717529297,
+        "height": 189.30209350585938,
+        "scrollTop": 3717.333251953125,
+        "scrollHeight": 4651,
+        "clientHeight": 189
+      },
+      "recent": {
+        "x": 25.33333396911621,
+        "y": 345.3020935058594,
+        "top": 345.3020935058594,
+        "bottom": 509.3333435058594,
+        "width": 218.6666717529297,
+        "height": 164.03125,
+        "scrollTop": 0,
+        "scrollHeight": 163,
+        "clientHeight": 163
+      },
+      "recentList": {
+        "x": 25.33333396911621,
+        "y": 389.3020935058594,
+        "top": 389.3020935058594,
+        "bottom": 509.3333435058594,
+        "width": 218.6666717529297,
+        "height": 120.03125,
+        "scrollTop": 0,
+        "scrollHeight": 499,
+        "clientHeight": 120
+      },
+      "recentCount": 8,
+      "visibleRecent": [
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件2-用于验证较长文件名称与路径省略显示.md",
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md"
+      ],
+      "recentHeaderVisible": true,
+      "activeHeading": "第35节-较长目录标题与窗口尺寸自适应",
+      "activeVisible": true
+    }
+  ],
+  "independentRecentScroll": true,
+  "resizeFollowPreservesDocument": true,
+  "actualRecentOpen": true,
+  "closedNormally": true,
+  "errors": [],
+  "resizeFollow": {
+    "beforeResize": {
+      "width": 960,
+      "height": 650,
+      "pageWidth": 945,
+      "title": "最近文件2-用于验证较长文件名称与路径省略显示.md - Markdown Viewer v2",
+      "heading": "侧栏自适应真实文件2",
+      "scrollY": 26183.333984375,
+      "sidebar": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 626,
+        "width": 252,
+        "height": 602,
+        "scrollTop": 0,
+        "scrollHeight": 602,
+        "clientHeight": 602
+      },
+      "panel": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 626,
+        "width": 252,
+        "height": 602,
+        "scrollTop": 0,
+        "scrollHeight": 601,
+        "clientHeight": 601
+      },
+      "toc": {
+        "x": 25.33333396911621,
+        "y": 140,
+        "top": 140,
+        "bottom": 394.3020935058594,
+        "width": 218.6666717529297,
+        "height": 254.30209350585938,
+        "scrollTop": 3760,
+        "scrollHeight": 4651,
+        "clientHeight": 254
+      },
+      "recent": {
+        "x": 25.33333396911621,
+        "y": 410.3020935058594,
+        "top": 410.3020935058594,
+        "bottom": 609.3333435058594,
+        "width": 218.6666717529297,
+        "height": 199.03125,
+        "scrollTop": 0,
+        "scrollHeight": 198,
+        "clientHeight": 198
+      },
+      "recentList": {
+        "x": 25.33333396911621,
+        "y": 454.3020935058594,
+        "top": 454.3020935058594,
+        "bottom": 609.3333435058594,
+        "width": 218.6666717529297,
+        "height": 155.03125,
+        "scrollTop": 0,
+        "scrollHeight": 499,
+        "clientHeight": 155
+      },
+      "recentCount": 8,
+      "visibleRecent": [
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件2-用于验证较长文件名称与路径省略显示.md",
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md"
+      ],
+      "recentHeaderVisible": true,
+      "activeHeading": "第35节-较长目录标题与窗口尺寸自适应",
+      "activeVisible": true
+    },
+    "manuallyHidden": {
+      "width": 960,
+      "height": 650,
+      "pageWidth": 945,
+      "title": "最近文件2-用于验证较长文件名称与路径省略显示.md - Markdown Viewer v2",
+      "heading": "侧栏自适应真实文件2",
+      "scrollY": 26183.333984375,
+      "sidebar": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 626,
+        "width": 252,
+        "height": 602,
+        "scrollTop": 0,
+        "scrollHeight": 602,
+        "clientHeight": 602
+      },
+      "panel": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 626,
+        "width": 252,
+        "height": 602,
+        "scrollTop": 0,
+        "scrollHeight": 601,
+        "clientHeight": 601
+      },
+      "toc": {
+        "x": 25.33333396911621,
+        "y": 140,
+        "top": 140,
+        "bottom": 394.3020935058594,
+        "width": 218.6666717529297,
+        "height": 254.30209350585938,
+        "scrollTop": 0,
+        "scrollHeight": 4651,
+        "clientHeight": 254
+      },
+      "recent": {
+        "x": 25.33333396911621,
+        "y": 410.3020935058594,
+        "top": 410.3020935058594,
+        "bottom": 609.3333435058594,
+        "width": 218.6666717529297,
+        "height": 199.03125,
+        "scrollTop": 0,
+        "scrollHeight": 198,
+        "clientHeight": 198
+      },
+      "recentList": {
+        "x": 25.33333396911621,
+        "y": 454.3020935058594,
+        "top": 454.3020935058594,
+        "bottom": 609.3333435058594,
+        "width": 218.6666717529297,
+        "height": 155.03125,
+        "scrollTop": 0,
+        "scrollHeight": 499,
+        "clientHeight": 155
+      },
+      "recentCount": 8,
+      "visibleRecent": [
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件2-用于验证较长文件名称与路径省略显示.md",
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md"
+      ],
+      "recentHeaderVisible": true,
+      "activeHeading": "第35节-较长目录标题与窗口尺寸自适应",
+      "activeVisible": false
+    },
+    "afterResize": {
+      "width": 960,
+      "height": 550,
+      "pageWidth": 945,
+      "title": "最近文件2-用于验证较长文件名称与路径省略显示.md - Markdown Viewer v2",
+      "heading": "侧栏自适应真实文件2",
+      "scrollY": 26183.333984375,
+      "sidebar": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 526,
+        "width": 252,
+        "height": 502,
+        "scrollTop": 0,
+        "scrollHeight": 502,
+        "clientHeight": 502
+      },
+      "panel": {
+        "x": 8.666666984558105,
+        "y": 24,
+        "top": 24,
+        "bottom": 526,
+        "width": 252,
+        "height": 502,
+        "scrollTop": 0,
+        "scrollHeight": 501,
+        "clientHeight": 501
+      },
+      "toc": {
+        "x": 25.33333396911621,
+        "y": 140,
+        "top": 140,
+        "bottom": 329.3020935058594,
+        "width": 218.6666717529297,
+        "height": 189.30209350585938,
+        "scrollTop": 3717.333251953125,
+        "scrollHeight": 4651,
+        "clientHeight": 189
+      },
+      "recent": {
+        "x": 25.33333396911621,
+        "y": 345.3020935058594,
+        "top": 345.3020935058594,
+        "bottom": 509.3333435058594,
+        "width": 218.6666717529297,
+        "height": 164.03125,
+        "scrollTop": 0,
+        "scrollHeight": 163,
+        "clientHeight": 163
+      },
+      "recentList": {
+        "x": 25.33333396911621,
+        "y": 389.3020935058594,
+        "top": 389.3020935058594,
+        "bottom": 509.3333435058594,
+        "width": 218.6666717529297,
+        "height": 120.03125,
+        "scrollTop": 0,
+        "scrollHeight": 499,
+        "clientHeight": 120
+      },
+      "recentCount": 8,
+      "visibleRecent": [
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件2-用于验证较长文件名称与路径省略显示.md",
+        "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\sidebar-packaged-fixtures\\最近文件8-用于验证较长文件名称与路径省略显示.md"
+      ],
+      "recentHeaderVisible": true,
+      "activeHeading": "第35节-较长目录标题与窗口尺寸自适应",
+      "activeVisible": true
+    }
+  }
+}
