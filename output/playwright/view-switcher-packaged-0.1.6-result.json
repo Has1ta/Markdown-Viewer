@@ -1,0 +1,94 @@
+{
+  "version": "0.1.6",
+  "executable": "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\release\\win-unpacked\\Markdown Viewer.exe",
+  "fixture": "C:\\Users\\Has1ta\\Desktop\\markdown v2重置\\.playwright-cli\\view-switching-packaged-fixture.md",
+  "opened": true,
+  "toolbarFixed": true,
+  "positionChecks": [
+    {
+      "mode": "渲染",
+      "active": "第03节表格样式",
+      "id": "第03节表格样式",
+      "progress": 0.42995221409065415,
+      "scrollY": 4948,
+      "splitReady": false
+    },
+    {
+      "mode": "源码",
+      "active": "第03节表格样式",
+      "id": "第03节表格样式",
+      "progress": 0.4301609367952188,
+      "scrollY": 2912,
+      "splitReady": false
+    },
+    {
+      "mode": "源码",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7198758880243572,
+      "scrollY": 10406,
+      "splitReady": false
+    },
+    {
+      "mode": "渲染",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7197457514604355,
+      "scrollY": 16856.666015625,
+      "splitReady": false
+    },
+    {
+      "mode": "双栏",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7197975612006396,
+      "scrollY": 13678,
+      "splitReady": true
+    },
+    {
+      "mode": "源码",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7197792323120047,
+      "scrollY": 8466,
+      "splitReady": false
+    },
+    {
+      "mode": "双栏",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7196408457270924,
+      "scrollY": 15368.6669921875,
+      "splitReady": true
+    },
+    {
+      "mode": "渲染",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7197457514604355,
+      "scrollY": 16856.666015625,
+      "splitReady": false
+    },
+    {
+      "mode": "源码",
+      "active": "第09节",
+      "id": "第09节",
+      "progress": 0.7197792323120047,
+      "scrollY": 8466,
+      "splitReady": false
+    }
+  ],
+  "sourceUnchanged": true,
+  "closedNormally": true,
+  "errors": [],
+  "toolbar": {
+    "x": 1158.666748046875,
+    "y": 277.3333435058594,
+    "width": 68,
+    "height": 203.33334350585938,
+    "position": "fixed",
+    "scrollY": 720,
+    "viewport": 1266,
+    "page": 1251
+  }
+}

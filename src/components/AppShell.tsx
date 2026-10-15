@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState, type ComponentType, type CSSProperties, type DragEvent } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState, type ComponentType, type CSSProperties, type DragEvent, type KeyboardEvent } from "react";
 import { ArrowUp, FolderOpen, PanelLeft, Save, SaveAll, X } from "lucide-react";
 import type { DocumentStats, HeadingItem, RecentFile, ViewMode } from "../app/app-types";
 import { BottomBar } from "./BottomBar";
@@ -8,6 +8,7 @@ import { Sidebar } from "./Sidebar";
 import { RenderEditor } from "../editor/RenderEditor";
 import { EmptyState } from "./EmptyState";
 import { Toast } from "./Toast";
+import { sectionProgress, type ReadingPosition, type SourceNavigationApi } from "../editor/reading-position";
 
 const SourceEditor = lazy(() => import("../editor/SourceEditor").then((module) => ({ default: module.SourceEditor })));
 const SplitEditor = lazy(() => import("../editor/SplitEditor").then((module) => ({ default: module.SplitEditor })));
@@ -63,7 +64,11 @@ export function AppShell({
     requestId: number;
     viewMode: ViewMode;
     filePath: string | null;
+    progress?: number;
+    atStart?: boolean;
   } | null>(null);
+  const [pendingRenderPosition, setPendingRenderPosition] = useState<ReadingPosition | null>(null);
+  const [compactSwitcher, setCompactSwitcher] = useState(() => window.matchMedia("(max-width: 767px)").matches);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
   const [isBackToTopVisible, setIsBackToTopVisible] = useState(false);
   const [backToTopLift, setBackToTopLift] = useState(0);
@@ -72,10 +77,23 @@ export function AppShell({
   const navigationInProgressRef = useRef(false);
   const navigationReleaseTimerRef = useRef<number | null>(null);
   const sourceNavigationRequestRef = useRef(0);
+  const sourceNavigationApiRef = useRef<SourceNavigationApi | null>(null);
+  const lastReadingPositionRef = useRef<ReadingPosition | null>(null);
   const isDraggingFile = dragDepth > 0;
   const currentSourceNavigationTarget = sourceNavigationTarget?.viewMode === viewMode && sourceNavigationTarget.filePath === filePath
     ? sourceNavigationTarget
     : null;
+
+  const registerSourceNavigationApi = useCallback((api: SourceNavigationApi | null) => {
+    sourceNavigationApiRef.current = api;
+  }, []);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const update = () => setCompactSwitcher(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     setActiveHeadingId((currentId) => {
@@ -190,12 +208,56 @@ export function AppShell({
 
   useEffect(() => {
     setSourceNavigationTarget(null);
+    setPendingRenderPosition(null);
+    lastReadingPositionRef.current = null;
     navigationInProgressRef.current = false;
     if (navigationReleaseTimerRef.current !== null) {
       window.clearTimeout(navigationReleaseTimerRef.current);
       navigationReleaseTimerRef.current = null;
     }
-  }, [filePath, viewMode]);
+  }, [filePath, fileName]);
+
+  useEffect(() => {
+    if (viewMode !== "render" || !pendingRenderPosition) return;
+
+    const position = pendingRenderPosition;
+    let isDisposed = false;
+    let frameId = 0;
+    navigationInProgressRef.current = true;
+    setActiveHeadingId(position.headingId);
+
+    function restorePosition(attempt = 0) {
+      if (isDisposed) return;
+      const article = document.querySelector<HTMLElement>(".markdown-body");
+      const index = headings.findIndex(({ id }) => id === position.headingId);
+      const heading = (position.headingId ? article?.querySelector<HTMLElement>(`#${CSS.escape(position.headingId)}`) : article) ?? article;
+      if (!article || !heading) {
+        navigationInProgressRef.current = false;
+        setPendingRenderPosition(null);
+        return;
+      }
+      const nextHeading = headings[index + 1];
+      const nextElement = index >= 0 && nextHeading ? article.querySelector<HTMLElement>(`#${CSS.escape(nextHeading.id)}`) : null;
+      const start = heading.getBoundingClientRect().top + window.scrollY;
+      const end = (nextElement ?? article).getBoundingClientRect()[nextElement ? "top" : "bottom"] + window.scrollY;
+      const offset = Math.min(128, window.innerHeight * 0.24);
+      const top = position.atStart ? 0 : Math.max(0, start + (end - start) * position.progress - offset);
+      const before = window.scrollY;
+      window.scrollTo({ top, behavior: "instant" });
+      if (attempt < 7 && (attempt < 2 || Math.abs(before - window.scrollY) > 1)) {
+        frameId = window.requestAnimationFrame(() => restorePosition(attempt + 1));
+      } else {
+        setPendingRenderPosition(null);
+        navigationInProgressRef.current = false;
+      }
+    }
+
+    frameId = window.requestAnimationFrame(() => restorePosition());
+    return () => {
+      isDisposed = true;
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [headings, pendingRenderPosition, viewMode]);
 
   useEffect(() => () => {
     if (navigationReleaseTimerRef.current !== null) {
@@ -241,6 +303,67 @@ export function AppShell({
 
   function handleSourceActiveHeadingChange(headingId: string) {
     setActiveHeadingId((currentId) => currentId === headingId ? currentId : headingId);
+  }
+
+  function captureRenderedPosition(): ReadingPosition | null {
+    const article = document.querySelector<HTMLElement>(".markdown-body");
+    if (!article) return null;
+    const readingY = Math.min(128, window.innerHeight * 0.24);
+    const elements = headings.map((heading) => ({ heading, element: article.querySelector<HTMLElement>(`#${CSS.escape(heading.id)}`) }))
+      .filter((entry): entry is { heading: HeadingItem; element: HTMLElement } => entry.element !== null);
+    let index = 0;
+    for (let current = 0; current < elements.length; current += 1) {
+      if (elements[current].element.getBoundingClientRect().top > readingY) break;
+      index = current;
+    }
+    // 页尾空间不足以把目标标题置顶时，保留仍在屏幕内的目录定位章节。
+    const activeIndex = elements.findIndex(({ heading }) => heading.id === activeHeadingId);
+    if (activeIndex >= 0) {
+      const activeTop = elements[activeIndex].element.getBoundingClientRect().top;
+      if (activeTop > readingY && activeTop < window.innerHeight) index = activeIndex;
+    }
+    const heading = elements[index];
+    const start = (heading?.element ?? article).getBoundingClientRect().top;
+    const nextElement = elements[index + 1]?.element;
+    const end = nextElement ? nextElement.getBoundingClientRect().top : article.getBoundingClientRect().bottom;
+    return { headingId: heading?.heading.id ?? "", progress: sectionProgress(readingY, start, end), atStart: window.scrollY <= 1 };
+  }
+
+  function handleChangeViewMode(nextViewMode: ViewMode) {
+    if (nextViewMode === viewMode) return;
+    const position = (viewMode === "render" ? captureRenderedPosition() : sourceNavigationApiRef.current?.getReadingPosition())
+      ?? lastReadingPositionRef.current
+      ?? { headingId: activeHeadingId, progress: 0, atStart: window.scrollY <= 1 };
+    lastReadingPositionRef.current = position;
+    sourceNavigationApiRef.current?.flushPendingChanges();
+    if (navigationReleaseTimerRef.current !== null) {
+      window.clearTimeout(navigationReleaseTimerRef.current);
+      navigationReleaseTimerRef.current = null;
+    }
+    navigationInProgressRef.current = true;
+    setActiveHeadingId(position.headingId);
+    sourceNavigationRequestRef.current += 1;
+    if (nextViewMode === "render") {
+      setSourceNavigationTarget(null);
+      setPendingRenderPosition(position);
+    } else {
+      setPendingRenderPosition(null);
+      setSourceNavigationTarget({ ...position, requestId: sourceNavigationRequestRef.current, viewMode: nextViewMode, filePath });
+    }
+    onChangeViewMode(nextViewMode);
+  }
+
+  function handleViewSwitcherKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const backwards = compactSwitcher ? "ArrowLeft" : "ArrowUp";
+    const forwards = compactSwitcher ? "ArrowRight" : "ArrowDown";
+    const currentIndex = viewModes.findIndex(({ value }) => value === viewMode);
+    const index = event.key === "Home" ? 0 : event.key === "End" ? viewModes.length - 1
+      : event.key === forwards ? (currentIndex + 1) % viewModes.length
+      : event.key === backwards ? (currentIndex + viewModes.length - 1) % viewModes.length : -1;
+    if (index < 0) return;
+    event.preventDefault();
+    event.currentTarget.querySelectorAll<HTMLButtonElement>("[role=tab]")[index]?.focus({ preventScroll: true });
+    handleChangeViewMode(viewModes[index].value);
   }
 
   function scrollToTop() {
@@ -320,7 +443,7 @@ export function AppShell({
           onOpenFile={onOpenFile}
         />
 
-        <div className="view-switcher" role="tablist" aria-label="视图模式">
+        <div className="view-switcher" role="tablist" aria-label="视图模式" aria-orientation={compactSwitcher ? "horizontal" : "vertical"} onKeyDown={handleViewSwitcherKeyDown}>
           {viewModes.map((item) => {
             const Icon = item.icon;
             const isActive = viewMode === item.value;
@@ -333,7 +456,8 @@ export function AppShell({
                 className={isActive ? "view-button is-active" : "view-button"}
                 aria-controls="document-editor-surface"
                 aria-selected={isActive}
-                onClick={() => onChangeViewMode(item.value)}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => handleChangeViewMode(item.value)}
               >
                 <Icon size={17} />
                 <span>{item.label}</span>
@@ -354,6 +478,7 @@ export function AppShell({
                 headings={headings}
                 navigationTarget={currentSourceNavigationTarget}
                 onActiveHeadingChange={handleSourceActiveHeadingChange}
+                onRegisterNavigationApi={registerSourceNavigationApi}
               />
             </Suspense>
           )}
@@ -365,6 +490,7 @@ export function AppShell({
                 headings={headings}
                 navigationTarget={currentSourceNavigationTarget}
                 onActiveHeadingChange={handleSourceActiveHeadingChange}
+                onRegisterNavigationApi={registerSourceNavigationApi}
               />
             </Suspense>
           )}

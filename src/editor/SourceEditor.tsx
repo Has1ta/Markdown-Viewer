@@ -15,16 +15,18 @@ import {
 import { sourceEditorTheme, sourceHighlightStyle } from "./source-editor-theme";
 import type { HeadingItem } from "../app/app-types";
 import { findHeadingAtSourceLine, sourceReadingPosition } from "./source-navigation";
+import { sectionProgress, type SourceNavigationApi, type SourceNavigationTarget } from "./reading-position";
 
 interface SourceEditorProps {
   markdown: string;
   onChangeMarkdown: (markdown: string) => void;
   headings?: HeadingItem[];
-  navigationTarget?: { headingId: string; requestId: number } | null;
+  navigationTarget?: SourceNavigationTarget | null;
   onActiveHeadingChange?: (headingId: string) => void;
+  onRegisterNavigationApi?: (api: SourceNavigationApi | null) => void;
 }
 
-export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationTarget, onActiveHeadingChange }: SourceEditorProps) {
+export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationTarget, onActiveHeadingChange, onRegisterNavigationApi }: SourceEditorProps) {
   const editorHostRef = useRef<HTMLDivElement | null>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChangeMarkdown);
@@ -32,6 +34,7 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
   const changeFrameRef = useRef<number | null>(null);
   const headingsRef = useRef(headings ?? []);
   const onActiveHeadingChangeRef = useRef(onActiveHeadingChange);
+  const onRegisterNavigationApiRef = useRef(onRegisterNavigationApi);
   const activeHeadingRef = useRef("");
   const activeFrameRef = useRef<number | null>(null);
   const navigationFrameRef = useRef<number | null>(null);
@@ -46,6 +49,10 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
   useEffect(() => {
     onChangeRef.current = onChangeMarkdown;
   }, [onChangeMarkdown]);
+
+  useEffect(() => {
+    onRegisterNavigationApiRef.current = onRegisterNavigationApi;
+  }, [onRegisterNavigationApi]);
 
   useEffect(() => {
     headingsRef.current = headings ?? [];
@@ -99,6 +106,29 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
     });
 
     editorViewRef.current = editorView;
+    onRegisterNavigationApiRef.current?.({
+      getReadingPosition() {
+        const view = editorViewRef.current;
+        if (!view) return null;
+        const bounds = view.scrollDOM.getBoundingClientRect();
+        const readingY = sourceReadingPosition(window.innerHeight, bounds.top, bounds.bottom);
+        const block = view.lineBlockAtHeight(Math.max(0, readingY - view.documentTop));
+        const currentHeadings = headingsRef.current;
+        const heading = currentHeadings.find(({ id }) => id === navigationLockRef.current?.headingId)
+          ?? findHeadingAtSourceLine(currentHeadings, view.state.doc.lineAt(block.from).number);
+        const nextHeading = heading ? currentHeadings[currentHeadings.indexOf(heading) + 1] : undefined;
+        const start = heading ? view.lineBlockAt(view.state.doc.line(Math.min(heading.lineNumber, view.state.doc.lines)).from).top : 0;
+        const end = nextHeading
+          ? view.lineBlockAt(view.state.doc.line(Math.min(nextHeading.lineNumber, view.state.doc.lines)).from).top
+          : view.contentHeight;
+        return {
+          headingId: heading?.id ?? "",
+          progress: sectionProgress(readingY - view.documentTop, start, end),
+          atStart: window.scrollY <= 1 && view.scrollDOM.scrollTop <= 1
+        };
+      },
+      flushPendingChanges: flushPendingMarkdownChange
+    });
     scheduleActiveHeadingUpdate();
     const onScrollKey = (event: KeyboardEvent) => {
       if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
@@ -126,6 +156,7 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
 
     return () => {
       cancelPendingMarkdownChange();
+      onRegisterNavigationApiRef.current?.(null);
       navigationVersionRef.current += 1;
       if (activeFrameRef.current !== null) window.cancelAnimationFrame(activeFrameRef.current);
       if (navigationFrameRef.current !== null) window.cancelAnimationFrame(navigationFrameRef.current);
@@ -164,13 +195,16 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
   useEffect(() => {
     const editorView = editorViewRef.current;
     const heading = headingsRef.current.find(({ id }) => id === navigationTarget?.headingId);
-    if (!editorView || !heading || !navigationTarget) return;
+    if (!editorView || !navigationTarget || (navigationTarget.headingId && !heading)) return;
 
-    navigationLockRef.current = { headingId: heading.id, isAligning: true, windowTop: 0, innerTop: 0 };
+    const headingId = heading?.id ?? "";
+    navigationLockRef.current = { headingId, isAligning: true, windowTop: 0, innerTop: 0 };
     const navigationVersion = ++navigationVersionRef.current;
     const navigatingView = editorView;
-    const targetLineNumber = heading.lineNumber;
-    reportActiveHeading(heading.id);
+    const targetLineNumber = heading?.lineNumber ?? 1;
+    const targetProgress = Math.max(0, Math.min(1, navigationTarget.progress ?? 0));
+    const atStart = navigationTarget.atStart ?? false;
+    reportActiveHeading(headingId);
     // Distant wrapped lines initially have estimated heights. Re-measure after
     // CodeMirror renders the destination; scroll only the intended containers.
     function alignHeading(attempt = 0) {
@@ -179,20 +213,25 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
         key: navigationVersionRef,
         read(view) {
           const sourceLine = view.state.doc.line(Math.min(targetLineNumber, view.state.doc.lines));
-          const lineTop = view.documentTop + view.lineBlockAt(sourceLine.from).top;
+          const start = view.lineBlockAt(sourceLine.from).top;
+          const nextHeading = heading ? headingsRef.current[headingsRef.current.findIndex(({ id }) => id === headingId) + 1] : undefined;
+          const end = nextHeading
+            ? view.lineBlockAt(view.state.doc.line(Math.min(nextHeading.lineNumber, view.state.doc.lines)).from).top
+            : view.contentHeight;
+          const lineTop = view.documentTop + start + (end - start) * targetProgress;
           const scroller = view.scrollDOM;
           const scrollerRect = scroller.getBoundingClientRect();
           const activationOffset = Math.min(128, window.innerHeight * 0.24);
           const scrollsInternally = scroller.scrollHeight > scroller.clientHeight + 1;
           const innerOffset = Math.min(28, scroller.clientHeight * 0.1);
           const desiredInnerTop = scrollerRect.top + innerOffset;
-          const innerTop = scrollsInternally
+          const innerTop = atStart ? 0 : scrollsInternally
             ? Math.max(0, Math.min(scroller.scrollHeight - scroller.clientHeight, scroller.scrollTop + (lineTop - desiredInnerTop) / view.scaleY))
             : scroller.scrollTop;
           const adjustedLineTop = lineTop - (innerTop - scroller.scrollTop) * view.scaleY;
           const shouldScrollWindow = !scrollsInternally || desiredInnerTop < activationOffset || desiredInnerTop > window.innerHeight - 60;
           const maxWindowTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-          const windowTop = shouldScrollWindow
+          const windowTop = atStart ? 0 : shouldScrollWindow
             ? Math.max(0, Math.min(maxWindowTop, window.scrollY + adjustedLineTop - activationOffset))
             : window.scrollY;
           return { innerTop, windowTop, windowLeft: window.scrollX,
@@ -233,7 +272,9 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
     onActiveHeadingChangeRef.current?.(headingId);
   }
 
-  function releaseNavigation() {
+  function releaseNavigation(event?: Event) {
+    // 点击视图切换栏时保留显式目录定位，供下一视图捕获；文末标题可能无法滚到阅读线。
+    if (event?.type === "pointerdown" && event.target instanceof Element && event.target.closest(".view-switcher")) return;
     navigationLockRef.current = null;
     navigationVersionRef.current += 1;
     if (navigationFrameRef.current !== null) window.cancelAnimationFrame(navigationFrameRef.current);
@@ -287,6 +328,12 @@ export function SourceEditor({ markdown, onChangeMarkdown, headings, navigationT
     }
 
     pendingMarkdownRef.current = null;
+  }
+
+  function flushPendingMarkdownChange() {
+    const pendingMarkdown = pendingMarkdownRef.current;
+    cancelPendingMarkdownChange();
+    if (pendingMarkdown !== null) onChangeRef.current(pendingMarkdown);
   }
 
   return <div className="source-editor" ref={editorHostRef} aria-label="Markdown 源码编辑器" />;

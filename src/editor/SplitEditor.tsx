@@ -3,16 +3,18 @@ import { RenderEditEditor } from "./RenderEditEditor";
 import { SourceEditor } from "./SourceEditor";
 import { createInitialSyncSnapshot, createNextSyncSnapshot, type EditorUpdateSource } from "./editor-sync";
 import type { HeadingItem } from "../app/app-types";
+import type { SourceNavigationApi, SourceNavigationTarget } from "./reading-position";
 
 interface SplitEditorProps {
   markdown: string;
   onChangeMarkdown: (markdown: string) => void;
   headings?: HeadingItem[];
-  navigationTarget?: { headingId: string; requestId: number } | null;
+  navigationTarget?: SourceNavigationTarget | null;
   onActiveHeadingChange?: (headingId: string) => void;
+  onRegisterNavigationApi?: (api: SourceNavigationApi | null) => void;
 }
 
-export function SplitEditor({ markdown, onChangeMarkdown, headings, navigationTarget, onActiveHeadingChange }: SplitEditorProps) {
+export function SplitEditor({ markdown, onChangeMarkdown, headings, navigationTarget, onActiveHeadingChange, onRegisterNavigationApi }: SplitEditorProps) {
   const syncSnapshotRef = useRef(createInitialSyncSnapshot(markdown));
 
   useEffect(() => {
@@ -42,6 +44,7 @@ export function SplitEditor({ markdown, onChangeMarkdown, headings, navigationTa
           headings={headings}
           navigationTarget={navigationTarget}
           onActiveHeadingChange={onActiveHeadingChange}
+          onRegisterNavigationApi={onRegisterNavigationApi}
         />
       </div>
       <div className="split-pane">
